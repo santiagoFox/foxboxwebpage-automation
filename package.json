@@ -1,0 +1,17 @@
+{
+  "name": "playwright_foxboxweb_project",
+  "version": "1.0.0",
+  "description": "Playwright E2E automation for foxbox.com",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "report": "npx playwright show-report reports/html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
