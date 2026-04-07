@@ -196,8 +196,9 @@ test.describe('SC16 - Footer Navigation Links', () => {
   });
 
   test('SC16-TC10 - Footer LinkedIn link is present and points to LinkedIn', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.footerLinkedIn);
-    await expect(homePage.footerLinkedIn).toHaveAttribute('href', /linkedin\.com/i);
+    const linkedInLink = homePage.page.locator('footer a[href*="linkedin"]');
+    await homePage.scrollToElement(linkedInLink);
+    await expect(linkedInLink).toHaveAttribute('href', /linkedin\.com/i);
   });
 });
 
