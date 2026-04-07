@@ -48,6 +48,7 @@ jobs:
 
       - name: Notify Slack on success
         if: success()
+        continue-on-error: true
         uses: slackapi/slack-github-action@v1.27.0
         with:
           channel-id: C0AR7RVS54M
@@ -59,6 +60,7 @@ jobs:
 
       - name: Notify Slack on failure
         if: failure()
+        continue-on-error: true
         uses: slackapi/slack-github-action@v1.27.0
         with:
           channel-id: C0AR7RVS54M
