@@ -233,6 +233,23 @@ class HomePage extends BasePage {
     await this.staffAugLearnMore.click();
   }
 
+  async clickLogo() {
+    await this.logo.click();
+    await this.waitForPageLoad();
+  }
+
+  async clickWhyWeDoButton() {
+    await this.scrollToElement(this.whyWeDoButton);
+    await this.whyWeDoButton.click();
+    await this.waitForPageLoad();
+  }
+
+  async clickTestimonialReadMore() {
+    await this.scrollToElement(this.testimonialReadMore);
+    await this.testimonialReadMore.click();
+    await this.waitForPageLoad();
+  }
+
   async clickChatWithUs() {
     await this.scrollToElement(this.chatWithUsButton);
     await this.chatWithUsButton.click();

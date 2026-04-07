@@ -63,6 +63,8 @@ npx playwright test --grep "SC11-TC07"
 - **FOLLOW US**: Exists in both footer and nav menu — scope with `page.locator('footer')` or use `.last()` on `span` filter
 - **Menu close**: `page.keyboard.press('Escape')` — no reliable close button selector
 - **Duplicate link names** (Product Lab, Product Maintenance, Staff Aug+): footer and nav both have these — use `.first()` for nav, scope with `page.locator('footer')` for footer
+- **Accordion collapsed state**: Use `toHaveCSS('height', '0px')` on content container — `toBeVisible()` won't detect hidden-via-CSS-height elements
+- **Menu animation waits**: `openNavMenu()` waits 500ms; other menu methods wait 300ms; `Escape` close waits 400ms — don't remove these or tests will flake
 
 ---
 
@@ -85,12 +87,12 @@ npx playwright test --grep "SC11-TC07"
 
 ---
 
+## Fixtures Note
+
+`fixtures.js` injects `pointer-events: none` on all iframes after page load to disable the Intercom chat overlay, which otherwise intercepts clicks in tests.
+
+---
+
 ## Pending Scenarios
 
-- Footer navigation link tests (Contact us, About, Blog, Careers, Approach, Culture, Services links, Privacy Policy)
-- Newsletter signup validation (valid email, invalid email, empty submit)
-- Case study "SEE THE CASE STUDY" link navigation
-- "WHY WE DO WHAT WE DO" button navigation
-- Testimonial "READ MORE" navigation
-- Logo click returns to home
 - Responsive / mobile viewport tests

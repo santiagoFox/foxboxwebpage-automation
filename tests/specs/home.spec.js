@@ -15,6 +15,13 @@ test.describe('SC01 - Header / Navigation', () => {
     const title = await homePage.getTitle();
     expect(title).toContain('Foxbox');
   });
+
+  test('SC01-TC04 - Logo click navigates to home page', async ({ homePage }) => {
+    await homePage.page.goto('/about');
+    await homePage.waitForPageLoad();
+    await homePage.clickLogo();
+    await expect(homePage.page).toHaveURL(/foxbox\.com\/?$/);
+  });
 });
 
 test.describe('SC02 - Hero Section', () => {
@@ -67,6 +74,21 @@ test.describe('SC04 - Case Studies', () => {
     await homePage.scrollToElement(homePage.homeChefCaseStudyLink);
     await expect(homePage.homeChefCaseStudyLink).toBeVisible();
   });
+
+  test('SC04-TC07 - K Health case study link navigates to K Health page', async ({ homePage }) => {
+    await homePage.clickKHealthCaseStudy();
+    await expect(homePage.page).toHaveURL(/k-?health/i);
+  });
+
+  test('SC04-TC08 - X Company case study link navigates to X Company page', async ({ homePage }) => {
+    await homePage.clickXCompanyCaseStudy();
+    await expect(homePage.page).toHaveURL(/x-?company|xcompany/i);
+  });
+
+  test('SC04-TC09 - Home Chef case study link navigates to Home Chef page', async ({ homePage }) => {
+    await homePage.clickHomeChefCaseStudy();
+    await expect(homePage.page).toHaveURL(/home-?chef/i);
+  });
 });
 
 test.describe('SC05 - Testimonial Section', () => {
@@ -83,6 +105,11 @@ test.describe('SC05 - Testimonial Section', () => {
   test('SC05-TC03 - Read More button is visible', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.testimonialReadMore);
     await expect(homePage.testimonialReadMore).toBeVisible();
+  });
+
+  test('SC05-TC04 - Testimonial "Read More" navigates away from home', async ({ homePage }) => {
+    await homePage.clickTestimonialReadMore();
+    await expect(homePage.page).not.toHaveURL(/foxbox\.com\/?$/);
   });
 });
 
@@ -247,12 +274,42 @@ test.describe('SC08 - What We Believe Section', () => {
     await homePage.scrollToElement(homePage.whyWeDoButton);
     await expect(homePage.whyWeDoButton).toBeVisible();
   });
+
+  test('SC08-TC04 - "Why We Do What We Do" button navigates to About page', async ({ homePage }) => {
+    await homePage.clickWhyWeDoButton();
+    await expect(homePage.page).toHaveURL(/\/about/);
+  });
 });
 
 test.describe('SC09 - Trusted to Deliver Section', () => {
   test('SC09-TC01 - "Trusted to deliver" heading is visible', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.trustedHeading);
     await expect(homePage.trustedHeading).toBeVisible();
+  });
+
+  test('SC09-TC02 - K Health logo is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.kHealthLogo);
+    await expect(homePage.kHealthLogo).toBeVisible();
+  });
+
+  test('SC09-TC03 - Versapay logo is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.versapayLogo);
+    await expect(homePage.versapayLogo).toBeVisible();
+  });
+
+  test('SC09-TC04 - Anthem logo is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.anthemLogo);
+    await expect(homePage.anthemLogo).toBeVisible();
+  });
+
+  test('SC09-TC05 - Freshpaint logo is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.freshpaintLogo);
+    await expect(homePage.freshpaintLogo).toBeVisible();
+  });
+
+  test('SC09-TC06 - Home Chef logo is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.homeChefLogo);
+    await expect(homePage.homeChefLogo).toBeVisible();
   });
 });
 
@@ -317,5 +374,18 @@ test.describe('SC11 - Footer', () => {
   test('SC11-TC09 - Newsletter accepts email input', async ({ homePage }) => {
     await homePage.fillNewsletterEmail(testData.newsletter.validEmail);
     await expect(homePage.newsletterInput).toHaveValue(testData.newsletter.validEmail);
+  });
+
+  test('SC11-TC10 - Newsletter accepts invalid email input', async ({ homePage }) => {
+    await homePage.fillNewsletterEmail(testData.newsletter.invalidEmail);
+    await expect(homePage.newsletterInput).toHaveValue(testData.newsletter.invalidEmail);
+  });
+
+  test('SC11-TC11 - Newsletter Sign Up button is clickable with empty input', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.newsletterInput);
+    await homePage.newsletterInput.clear();
+    await homePage.submitNewsletter();
+    // Page should remain stable — no crash or navigation away
+    await expect(homePage.page).toHaveURL(/foxbox\.com/);
   });
 });
