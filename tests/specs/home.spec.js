@@ -171,7 +171,7 @@ test.describe('SC06 - Services Section', () => {
   test('SC06-TC11 - Product Lab Learn More navigates to Product Lab page', async ({ homePage }) => {
     await homePage.expandProductLab();
     await homePage.clickProductLabLearnMore();
-    await homePage.page.waitForLoadState('networkidle');
+    await homePage.page.waitForLoadState('load');
     await expect(homePage.page).toHaveURL(/\/product-lab/);
   });
 
@@ -196,7 +196,7 @@ test.describe('SC06 - Services Section', () => {
   test('SC06-TC15 - Product Maintenance Learn More navigates to Product Maintenance page', async ({ homePage }) => {
     await homePage.expandProductMaintenance();
     await homePage.clickProductMaintenanceLearnMore();
-    await homePage.page.waitForLoadState('networkidle');
+    await homePage.page.waitForLoadState('load');
     await expect(homePage.page).toHaveURL(/\/product-maintenance/);
   });
 
@@ -221,7 +221,7 @@ test.describe('SC06 - Services Section', () => {
   test('SC06-TC19 - Staff Aug+ Learn More navigates to Staff Aug page', async ({ homePage }) => {
     await homePage.expandStaffAug();
     await homePage.clickStaffAugLearnMore();
-    await homePage.page.waitForLoadState('networkidle');
+    await homePage.page.waitForLoadState('load');
     await expect(homePage.page).toHaveURL(/\/staff-aug/);
   });
 });
