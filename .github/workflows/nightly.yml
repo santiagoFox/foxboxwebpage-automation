@@ -46,27 +46,22 @@ jobs:
           path: test-results/
           retention-days: 7
 
-      - name: Notify Slack on success
-        if: success()
-        continue-on-error: true
-        uses: slackapi/slack-github-action@v1.27.0
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1.25.0
         with:
-          channel-id: C0AR7RVS54M
-          slack-message: |
-            *foxbox.com nightly tests passed* :white_check_mark:
-            Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>
+          payload: |
+            {
+              "text": "${{ job.status == 'success' && '✅' || '❌' }} foxbox.com nightly tests: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ job.status == 'success' && '✅ *foxbox.com nightly tests passed*' || '❌ *foxbox.com nightly tests FAILED*' }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run #${{ github.run_number }}>"
+                  }
+                }
+              ]
+            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-      - name: Notify Slack on failure
-        if: failure()
-        continue-on-error: true
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          channel-id: C0AR7RVS54M
-          slack-message: |
-            *foxbox.com nightly tests FAILED* :x:
-            Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>
-            Report artifact: `playwright-report-${{ github.run_number }}`
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
