@@ -45,3 +45,26 @@ jobs:
           name: test-results-${{ github.run_number }}
           path: test-results/
           retention-days: 7
+
+      - name: Notify Slack on success
+        if: success()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          channel-id: C0AR7RVS54M
+          slack-message: |
+            *foxbox.com nightly tests passed* :white_check_mark:
+            Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          channel-id: C0AR7RVS54M
+          slack-message: |
+            *foxbox.com nightly tests FAILED* :x:
+            Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_number }}>
+            Report artifact: `playwright-report-${{ github.run_number }}`
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
