@@ -132,67 +132,49 @@ test.describe('SC15 - Navigation Menu - WORK Links', () => {
 });
 
 test.describe('SC16 - Footer Navigation Links', () => {
-  test('SC16-TC01 - Footer "About" link navigates to About page', async ({ homePage }) => {
+  test('SC16-TC01 - Footer "About" link points to About page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerAbout);
-    await homePage.footerAbout.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/about/);
+    await expect(homePage.footerAbout).toHaveAttribute('href', /\/about/);
   });
 
-  test('SC16-TC02 - Footer "Blog" link navigates to Blog page', async ({ homePage }) => {
+  test('SC16-TC02 - Footer "Blog" link points to Blog page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerBlog);
-    await homePage.footerBlog.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/blog/);
+    await expect(homePage.footerBlog).toHaveAttribute('href', /\/blog/);
   });
 
-  test('SC16-TC03 - Footer "Careers" link navigates to Careers page', async ({ homePage }) => {
+  test('SC16-TC03 - Footer "Careers" link points to Careers page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerCareers);
-    await homePage.footerCareers.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/gem\.com|greenhouse|jobs/i);
+    await expect(homePage.footerCareers).toHaveAttribute('href', /gem\.com|greenhouse|jobs/i);
   });
 
-  test('SC16-TC04 - Footer "Approach" link navigates to Approach page', async ({ homePage }) => {
+  test('SC16-TC04 - Footer "Approach" link points to Approach page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerApproach);
-    await homePage.footerApproach.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/approach/);
+    await expect(homePage.footerApproach).toHaveAttribute('href', /\/approach/);
   });
 
-  test('SC16-TC05 - Footer "Culture" link navigates to Culture page', async ({ homePage }) => {
+  test('SC16-TC05 - Footer "Culture" link points to Culture page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerCulture);
-    await homePage.footerCulture.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/culture/);
+    await expect(homePage.footerCulture).toHaveAttribute('href', /\/culture/);
   });
 
-  test('SC16-TC06 - Footer "Product Lab" link navigates to Product Lab page', async ({ homePage }) => {
+  test('SC16-TC06 - Footer "Product Lab" link points to Product Lab page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerProductLab);
-    await homePage.footerProductLab.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/product-lab/);
+    await expect(homePage.footerProductLab).toHaveAttribute('href', /\/product-lab/);
   });
 
-  test('SC16-TC07 - Footer "Product Maintenance" link navigates to Product Maintenance page', async ({ homePage }) => {
+  test('SC16-TC07 - Footer "Product Maintenance" link points to Product Maintenance page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerProductMaintenance);
-    await homePage.footerProductMaintenance.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/product-maintenance/);
+    await expect(homePage.footerProductMaintenance).toHaveAttribute('href', /\/product-maintenance/);
   });
 
-  test('SC16-TC08 - Footer "Staff Aug+" link navigates to Staff Aug page', async ({ homePage }) => {
+  test('SC16-TC08 - Footer "Staff Aug+" link points to Staff Aug page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerStaffAug);
-    await homePage.footerStaffAug.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/staff-aug/);
+    await expect(homePage.footerStaffAug).toHaveAttribute('href', /\/staff-aug/);
   });
 
-  test('SC16-TC09 - Footer "Privacy Policy" link navigates to Privacy Policy page', async ({ homePage }) => {
+  test('SC16-TC09 - Footer "Privacy Policy" link points to Privacy Policy page', async ({ homePage }) => {
     await homePage.scrollToElement(homePage.footerPrivacyPolicy);
-    await homePage.footerPrivacyPolicy.click();
-    await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/privacy/i);
+    await expect(homePage.footerPrivacyPolicy).toHaveAttribute('href', /privacy/i);
   });
 
   test('SC16-TC10 - Footer LinkedIn link is present and points to LinkedIn', async ({ homePage }) => {

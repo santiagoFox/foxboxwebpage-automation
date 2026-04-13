@@ -7,7 +7,7 @@ Playwright E2E automation suite for **https://www.foxbox.com** — the Foxbox Di
 
 - **Framework**: Playwright v1.59+ with Chromium, viewport 1440×900
 - **Pattern**: Page Object Model (POM)
-- **Config**: `fullyParallel: false`, `retries: 1`, `timeout: 30s`, `expect timeout: 10s`
+- **Config**: `fullyParallel: false`, `retries: 1`, `timeout: 60s`, `expect timeout: 15s`
 
 ---
 
@@ -38,13 +38,37 @@ npx playwright test --grep "SC11-TC07"
 
 1. **`tests/fixtures/fixtures.js`** — extends Playwright's base `test` with a `homePage` fixture that auto-instantiates `HomePage` and calls `homePage.open()` before each test. All spec files import `{ test }` from here instead of from `@playwright/test`.
 
-2. **`tests/pages/base.page.js`** — `BasePage` holds the `page` reference and exposes `navigate()`, `scrollToElement()`, `isVisible()`, and `waitForPageLoad()` (uses `networkidle`).
+2. **`tests/pages/base.page.js`** — `BasePage` holds the `page` reference and exposes `navigate()`, `scrollToElement()`, `isVisible()`, and `waitForPageLoad()` (uses `load` state).
 
 3. **`tests/pages/home.page.js`** — `HomePage extends BasePage`. All locators are defined in the constructor; action methods (click, fill, expand) live here. Navigation tests drive the menu entirely through `HomePage` methods and locators.
 
 4. **`data/testData.js`** — single source of truth for expected strings (headings, article titles, copyright). Import and use these in assertions rather than hardcoding strings in specs.
 
 5. **`playwright.config.js`** — `testDir` points to `./tests/specs`. Reports go to `reports/html/`. Screenshots, video, and trace are captured only on failure.
+
+### Spec files and test ID convention
+
+Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole suite or `--grep "SC12-TC01"` for a single test.
+
+**`tests/specs/home.spec.js`** — SC01–SC11:
+- SC01: Header/Nav (logo, hamburger, page title)
+- SC02: Hero section
+- SC03: Welcome section
+- SC04: Case studies (K Health, X Company, Home Chef) + links
+- SC05: Testimonial section
+- SC06: Services accordions (expand/collapse, CSS height assertion, Learn More nav)
+- SC07: Inside the Box blog (articles, read more links)
+- SC08: What We Believe (6 beliefs, Why We Do button → /about)
+- SC09: Trusted to Deliver (5 client logos)
+- SC10: CTA section
+- SC11: Footer (newsletter, copyright, privacy policy, social links)
+
+**`tests/specs/navigation.spec.js`** — SC12–SC16:
+- SC12: Menu open/close (hamburger, Escape key, LET'S CHAT, address, Follow Us)
+- SC13: COMPANY links (About Us, Our Work, Inside the Box, Careers)
+- SC14: SOLUTIONS links (Product Lab, Product Maintenance, Staff Aug+, Healthcare, AI Readiness)
+- SC15: WORK links (See All Case Studies, Airspace, Versapay, Anthem)
+- SC16: Footer navigation links (About, Blog, Careers, Approach, Culture, all service pages, Privacy Policy, LinkedIn)
 
 ### Adding new page coverage
 
@@ -90,6 +114,16 @@ npx playwright test --grep "SC11-TC07"
 ## Fixtures Note
 
 `fixtures.js` injects `pointer-events: none` on all iframes after page load to disable the Intercom chat overlay, which otherwise intercepts clicks in tests.
+
+---
+
+## CI/CD
+
+**`.github/workflows/nightly.yml`** — runs nightly at 00:00 UTC and on manual dispatch:
+1. Installs Node 20, runs `npm ci`, installs Chromium
+2. Runs `npm test`
+3. Uploads HTML report as a 30-day artifact; uploads `test-results/` on failure (7 days)
+4. Posts pass/fail Slack notification via incoming webhook
 
 ---
 
