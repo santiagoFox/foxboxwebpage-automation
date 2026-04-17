@@ -74,6 +74,25 @@ const testData = {
     validEmail: 'test@example.com',
     invalidEmail: 'notanemail',
   },
+
+  about: {
+    heroHeading: 'Foxbox creates digital products that become indispensable for your business and your customers.',
+    heroSubheading: 'Staples for them. Growth engines for you.',
+    team: ['Rob Volk', 'Elliott Torres', 'Barrett Willich'],
+  },
+
+  blogPage: {
+    heroHeading: 'Inside the Box',
+    subheading: 'Articles, updates, and ideas you can put to use.',
+  },
+
+  caseStudiesPage: {
+    pageHeading: 'case studies',
+    featured: [
+      'K Health: Powering AI-Driven Healthcare with a Personalized Cross-Platform Experience',
+      'Airspace Data: Delivering a Properly Calibrated MVP',
+    ],
+  },
 };
 
 module.exports = testData;

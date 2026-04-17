@@ -32,6 +32,12 @@ test.describe('SC02 - Hero Section', () => {
   test('SC02-TC02 - Hero subheading is visible', async ({ homePage }) => {
     await expect(homePage.heroSubheading).toBeVisible();
   });
+
+  test('SC02-TC03 - Hero heading matches expected text', async ({ homePage }) => {
+    // heroHeading resolves to the <h1> that contains both heading and subheading lines,
+    // so use toContainText rather than toHaveText for an exact full-string match.
+    await expect(homePage.heroHeading).toContainText(testData.hero.heading);
+  });
 });
 
 test.describe('SC03 - Welcome Section', () => {
@@ -251,6 +257,22 @@ test.describe('SC07 - Inside the Box (Blog)', () => {
     await homePage.scrollToElement(homePage.insideTheBoxHeading);
     const count = await homePage.blogArticles.count();
     expect(count).toBeGreaterThanOrEqual(3);
+  });
+
+  test('SC07-TC06 - First blog article "Read More" link points to a blog post', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.insideTheBoxHeading);
+    // Index 0 is the testimonial "Read More"; blog articles start at index 1
+    await expect(homePage.blogArticles.nth(1)).toHaveAttribute('href', /\/blog\/.+/);
+  });
+
+  test('SC07-TC07 - Second blog article "Read More" link points to a blog post', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.insideTheBoxHeading);
+    await expect(homePage.blogArticles.nth(2)).toHaveAttribute('href', /\/blog\/.+/);
+  });
+
+  test('SC07-TC08 - Third blog article "Read More" link points to a blog post', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.insideTheBoxHeading);
+    await expect(homePage.blogArticles.nth(3)).toHaveAttribute('href', /\/blog\/.+/);
   });
 });
 
