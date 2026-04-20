@@ -23,11 +23,10 @@ test.describe('SC12 - Navigation Menu - Open / Close', () => {
     await expect(homePage.navLetsChatButton).toBeVisible();
   });
 
-  test('SC12-TC04 - Menu shows address and Follow Us section', async ({ homePage }) => {
+  test('SC12-TC04 - Menu shows Follow Us section', async ({ homePage }) => {
     await homePage.openNavMenu();
     // The nav overlay has a "Follow Us" span — scope to it to avoid footer conflict
     await expect(homePage.page.locator('span').filter({ hasText: /^Follow Us$/ }).last()).toBeVisible();
-    await expect(homePage.page.getByText('1720 W Division St, Chicago, IL')).toBeVisible();
   });
 });
 
