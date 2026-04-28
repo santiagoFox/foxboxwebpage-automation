@@ -57,7 +57,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - SC04: Case studies (K Health, X Company, Home Chef) + links
 - SC05: Testimonial section
 - SC06: Services accordions (expand/collapse, CSS height assertion, Learn More nav)
-- SC07: Inside the Box blog (articles, read more links)
+- SC07: Inside the Box blog (TC02–TC04 assert first/second/third article title by position; TC05–TC08 assert count and URL patterns)
 - SC08: What We Believe (6 beliefs, Why We Do button → /about)
 - SC09: Trusted to Deliver (5 client logos)
 - SC10: CTA section
@@ -89,6 +89,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - **Duplicate link names** (Product Lab, Product Maintenance, Staff Aug+): footer and nav both have these — use `.first()` for nav, scope with `page.locator('footer')` for footer
 - **Accordion collapsed state**: Use `toHaveCSS('height', '0px')` on content container — `toBeVisible()` won't detect hidden-via-CSS-height elements
 - **Menu animation waits**: `openNavMenu()` waits 500ms; other menu methods wait 300ms; `Escape` close waits 400ms — don't remove these or tests will flake
+- **Blog article title locators** (`firstArticleTitle`, `secondArticleTitle`, `thirdArticleTitle`) in both `home.page.js` and `blog.page.js` are hardcoded to the current top-3 articles — update them (and `data/testData.js` `blog.articles`) whenever the site's article list rotates
 
 ---
 
