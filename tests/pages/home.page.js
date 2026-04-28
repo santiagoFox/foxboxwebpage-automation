@@ -25,8 +25,6 @@ class HomePage extends BasePage {
     this.navProductMaintenance = page.getByRole('link', { name: 'Product Maintenance' }).first();
     this.navStaffAug = page.getByRole('link', { name: 'Staff Aug+' }).first();
     this.navHealthcare = page.getByRole('link', { name: 'Healthcare' });
-    this.navAIReadiness = page.getByRole('link', { name: 'AI Readiness Assessment' });
-
     // WORK links
     this.navSeeAllCaseStudies = page.getByRole('link', { name: 'See All Case Studies' });
     this.navAirspace = page.getByRole('link', { name: /Airspace Data/i });
@@ -106,13 +104,9 @@ class HomePage extends BasePage {
     // Inside the Box (blog)
     this.insideTheBoxHeading = page.getByText('Inside the Box');
     this.blogArticles = page.getByRole('link', { name: /READ MORE/i });
-    this.kHealthArticleTitle = page.getByText(
-      'K Health: Powering AI-Driven Healthcare'
-    );
-    this.claudeCodeArticleTitle = page.getByText(
-      'Automated QA Testing in Claude Code'
-    );
-    this.aiPilotArticleTitle = page.getByText(/Beyond the .95% Failure. Myth/);
+    this.firstArticleTitle = page.getByText('The Three Agent Model: How We Approach AI-Native Development');
+    this.secondArticleTitle = page.getByText('14 Days, 76 Commits, One Production Website');
+    this.thirdArticleTitle = page.getByText(/Why Your Cursor-Built MVP Will Break/);
 
     // What We Believe section
     this.whatWeBelieveHeading = page.getByText('What We Believe');

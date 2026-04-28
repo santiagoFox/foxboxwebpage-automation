@@ -238,19 +238,19 @@ test.describe('SC07 - Inside the Box (Blog)', () => {
     await expect(homePage.insideTheBoxHeading).toBeVisible();
   });
 
-  test('SC07-TC02 - K Health article title is visible', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.kHealthArticleTitle);
-    await expect(homePage.kHealthArticleTitle).toBeVisible();
+  test('SC07-TC02 - First article title is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.firstArticleTitle);
+    await expect(homePage.firstArticleTitle).toBeVisible();
   });
 
-  test('SC07-TC03 - Automated QA Testing article title is visible', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.claudeCodeArticleTitle);
-    await expect(homePage.claudeCodeArticleTitle).toBeVisible();
+  test('SC07-TC03 - Second article title is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.secondArticleTitle);
+    await expect(homePage.secondArticleTitle).toBeVisible();
   });
 
-  test('SC07-TC04 - AI Pilot article title is visible', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.aiPilotArticleTitle);
-    await expect(homePage.aiPilotArticleTitle).toBeVisible();
+  test('SC07-TC04 - Third article title is visible', async ({ homePage }) => {
+    await homePage.scrollToElement(homePage.thirdArticleTitle);
+    await expect(homePage.thirdArticleTitle).toBeVisible();
   });
 
   test('SC07-TC05 - Blog section has at least 3 Read More links', async ({ homePage }) => {

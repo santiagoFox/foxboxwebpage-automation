@@ -66,7 +66,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 **`tests/specs/navigation.spec.js`** — SC12–SC16:
 - SC12: Menu open/close (hamburger, Escape key, LET'S CHAT, address, Follow Us)
 - SC13: COMPANY links (About Us, Our Work, Inside the Box, Careers)
-- SC14: SOLUTIONS links (Product Lab, Product Maintenance, Staff Aug+, Healthcare, AI Readiness)
+- SC14: SOLUTIONS links (Product Lab, Product Maintenance, Staff Aug+, Healthcare)
 - SC15: WORK links (See All Case Studies, Airspace, Versapay, Anthem)
 - SC16: Footer navigation links (About, Blog, Careers, Approach, Culture, all service pages, Privacy Policy, LinkedIn)
 
@@ -82,7 +82,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 ## Key Locator Notes
 
 - **Hamburger button**: `page.getByRole('button', { name: 'Menu' })` — the SVG has `<title>Menu</title>`
-- **Curly apostrophes/quotes**: Use regex wildcard — e.g. `getByText(/Build what you couldn.t have/)`, `/Beyond the .95% Failure. Myth/`
+- **Curly apostrophes/quotes**: Use regex wildcard — e.g. `getByText(/Build what you couldn.t have/)`
 - **COMPANY/SOLUTIONS/WORK headers**: `getByText('COMPANY')` matches too broadly (hits "The X Company" text) — target the individual nav links instead
 - **FOLLOW US**: Exists in both footer and nav menu — scope with `page.locator('footer')` or use `.last()` on `span` filter
 - **Menu close**: `page.keyboard.press('Escape')` — no reliable close button selector
@@ -104,7 +104,6 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 | Product Maintenance | `/product-maintenance` |
 | Staff Aug+ | `/staff-aug` |
 | Healthcare | `/healthcare` |
-| AI Readiness Assessment | `/assessment` |
 | Airspace Data | URL contains `airspace` |
 | Versapay | URL contains `versapay` |
 | Anthem | URL contains `anthem` |

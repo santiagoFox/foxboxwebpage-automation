@@ -11,9 +11,9 @@ class BlogPage extends BasePage {
     // Article cards — the blog index links articles via their title, not a "Read More" button.
     // Exclude pagination links (/blog/page/N) so only article slugs are counted.
     this.articleLinks = page.locator('a[href^="/blog/"]:not([href^="/blog/page/"])');
-    this.firstArticleTitle = page.getByText('K Health: Powering AI-Driven Healthcare');
-    this.secondArticleTitle = page.getByText('Automated QA Testing in Claude Code');
-    this.thirdArticleTitle = page.getByText(/Beyond the .95% Failure. Myth/);
+    this.firstArticleTitle = page.getByText('The Three Agent Model: How We Approach AI-Native Development');
+    this.secondArticleTitle = page.getByText('14 Days, 76 Commits, One Production Website');
+    this.thirdArticleTitle = page.getByText(/Why Your Cursor-Built MVP Will Break/);
 
     // Pagination
     this.paginationNext = page.getByRole('link', { name: /Next/i });

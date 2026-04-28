@@ -89,14 +89,6 @@ test.describe('SC14 - Navigation Menu - SOLUTIONS Links', () => {
     await homePage.page.waitForLoadState('load');
     await expect(homePage.page).toHaveURL(/\/healthcare/);
   });
-
-  test('SC14-TC05 - "AI Readiness Assessment" navigates to Assessment page', async ({ homePage }) => {
-    await homePage.openNavMenu();
-    await homePage.navAIReadiness.click();
-    await homePage.page.waitForLoadState('load');
-    // Actual URL is /assessment
-    await expect(homePage.page).toHaveURL(/\/assessment/);
-  });
 });
 
 test.describe('SC15 - Navigation Menu - WORK Links', () => {
