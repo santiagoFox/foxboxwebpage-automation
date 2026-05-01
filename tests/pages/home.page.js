@@ -18,8 +18,6 @@ class HomePage extends BasePage {
     this.navAboutUs = page.getByRole('link', { name: 'About Us' });
     this.navOurWork = page.getByRole('link', { name: 'Our Work' });
     this.navInsideTheBox = page.getByRole('link', { name: 'Inside the Box' });
-    this.navCareers = page.getByRole('link', { name: 'Careers' });
-
     // SOLUTIONS links
     this.navProductLab = page.getByRole('link', { name: 'Product Lab' }).first();
     this.navProductMaintenance = page.getByRole('link', { name: 'Product Maintenance' }).first();
@@ -104,9 +102,9 @@ class HomePage extends BasePage {
     // Inside the Box (blog)
     this.insideTheBoxHeading = page.getByText('Inside the Box');
     this.blogArticles = page.getByRole('link', { name: /READ MORE/i });
-    this.firstArticleTitle = page.getByText('The Three Agent Model: How We Approach AI-Native Development');
-    this.secondArticleTitle = page.getByText('14 Days, 76 Commits, One Production Website');
-    this.thirdArticleTitle = page.getByText(/Why Your Cursor-Built MVP Will Break/);
+    this.firstArticleTitle = page.getByText('The Three Agent Model: How We Approach AI-Native Development').first();
+    this.secondArticleTitle = page.getByText('14 Days, 76 Commits, One Production Website').first();
+    this.thirdArticleTitle = page.getByText(/Why Your Cursor-Built MVP Will Break/).first();
 
     // What We Believe section
     this.whatWeBelieveHeading = page.getByText('What We Believe');

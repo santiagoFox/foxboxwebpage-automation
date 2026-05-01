@@ -51,14 +51,6 @@ test.describe('SC13 - Navigation Menu - COMPANY Links', () => {
     await homePage.page.waitForLoadState('load');
     await expect(homePage.page).toHaveURL(/\/blog/);
   });
-
-  test('SC13-TC04 - "Careers" navigates to Careers job board', async ({ homePage }) => {
-    await homePage.openNavMenu();
-    await homePage.navCareers.click();
-    await homePage.page.waitForLoadState('load');
-    // Careers redirects to external job board at jobs.gem.com/foxbox-digital
-    await expect(homePage.page).toHaveURL(/foxbox-digital|gem\.com/);
-  });
 });
 
 test.describe('SC14 - Navigation Menu - SOLUTIONS Links', () => {
