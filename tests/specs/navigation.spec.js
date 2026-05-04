@@ -92,11 +92,11 @@ test.describe('SC15 - Navigation Menu - WORK Links', () => {
     await expect(homePage.page).toHaveURL(/tags\/case-studies/);
   });
 
-  test('SC15-TC02 - "Airspace Data: Web MVP" navigates to Airspace case study', async ({ homePage }) => {
+  test('SC15-TC02 - "K Health: AI Healthcare" navigates to K Health case study', async ({ homePage }) => {
     await homePage.openNavMenu();
-    await homePage.navAirspace.click();
+    await homePage.navKHealth.click();
     await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/airspace/i);
+    await expect(homePage.page).toHaveURL(/k-health/i);
   });
 
   test('SC15-TC03 - "Versapay: Digital Payments Mobile Strategy" navigates to Versapay case study', async ({ homePage }) => {

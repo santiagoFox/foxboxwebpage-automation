@@ -22,10 +22,10 @@ class HomePage extends BasePage {
     this.navProductLab = page.getByRole('link', { name: 'Product Lab' }).first();
     this.navProductMaintenance = page.getByRole('link', { name: 'Product Maintenance' }).first();
     this.navStaffAug = page.getByRole('link', { name: 'Staff Aug+' }).first();
-    this.navHealthcare = page.getByRole('link', { name: 'Healthcare' });
+    this.navHealthcare = page.getByRole('link', { name: 'Healthcare', exact: true });
     // WORK links
     this.navSeeAllCaseStudies = page.getByRole('link', { name: 'See All Case Studies' });
-    this.navAirspace = page.getByRole('link', { name: /Airspace Data/i });
+    this.navKHealth = page.getByRole('link', { name: 'K Health: AI Healthcare' }).first();
     this.navVersapay = page.getByRole('link', { name: /Versapay/i });
     this.navAnthem = page.getByRole('link', { name: /Anthem.*Telehealth/i });
 

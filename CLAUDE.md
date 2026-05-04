@@ -36,15 +36,17 @@ npx playwright test --grep "SC11-TC07"
 
 ### How the pieces connect
 
-1. **`tests/fixtures/fixtures.js`** — extends Playwright's base `test` with a `homePage` fixture that auto-instantiates `HomePage` and calls `homePage.open()` before each test. All spec files import `{ test }` from here instead of from `@playwright/test`.
+1. **`tests/fixtures/fixtures.js`** — extends Playwright's base `test` with four fixtures: `homePage`, `aboutPage`, `blogPage`, and `caseStudiesPage`. Each fixture instantiates the corresponding page class, calls `open()`, and injects the iframe style tag. All spec files import `{ test }` from here instead of from `@playwright/test`.
 
 2. **`tests/pages/base.page.js`** — `BasePage` holds the `page` reference and exposes `navigate()`, `scrollToElement()`, `isVisible()`, and `waitForPageLoad()` (uses `load` state).
 
 3. **`tests/pages/home.page.js`** — `HomePage extends BasePage`. All locators are defined in the constructor; action methods (click, fill, expand) live here. Navigation tests drive the menu entirely through `HomePage` methods and locators.
 
-4. **`data/testData.js`** — single source of truth for expected strings (headings, article titles, copyright). Import and use these in assertions rather than hardcoding strings in specs.
+4. **`tests/pages/about.page.js`**, **`tests/pages/blog.page.js`**, **`tests/pages/case-studies.page.js`** — additional page classes following the same pattern: locators in constructor, `open()` navigates to the page URL.
 
-5. **`playwright.config.js`** — `testDir` points to `./tests/specs`. Reports go to `reports/html/`. Screenshots, video, and trace are captured only on failure.
+5. **`data/testData.js`** — single source of truth for expected strings (headings, article titles, copyright). Import and use these in assertions rather than hardcoding strings in specs.
+
+6. **`playwright.config.js`** — `testDir` points to `./tests/specs`. Reports go to `reports/html/`. Screenshots, video, and trace are captured only on failure.
 
 ### Spec files and test ID convention
 
@@ -64,18 +66,26 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - SC11: Footer (newsletter, copyright, privacy policy, social links)
 
 **`tests/specs/navigation.spec.js`** — SC12–SC16:
-- SC12: Menu open/close (hamburger, Escape key, LET'S CHAT, address, Follow Us)
+- SC12: Menu open/close (hamburger, Escape key, LET'S CHAT, Follow Us)
 - SC13: COMPANY links (About Us, Our Work, Inside the Box)
 - SC14: SOLUTIONS links (Product Lab, Product Maintenance, Staff Aug+, Healthcare)
 - SC15: WORK links (See All Case Studies, Airspace, Versapay, Anthem)
-- SC16: Footer navigation links (About, Blog, Careers, Approach, Culture, all service pages, Privacy Policy, LinkedIn)
+- SC16: Footer navigation links (About, Blog, Careers, Approach, Culture, Product Lab, Product Maintenance, Staff Aug+, Privacy Policy, LinkedIn)
+
+**`tests/specs/about.spec.js`** — SC17:
+- SC17: About page (WHO WE ARE heading, hero heading/subheading, leadership team cards, WHY FOXBOX? section, CHAT WITH US CTA, What We Believe, newsletter)
+
+**`tests/specs/blog.spec.js`** — SC18:
+- SC18: Blog page (Inside the Box heading, subheading, article count ≥ 3, first/second/third article title, Read More URL pattern, clicking first article navigates, pagination Next link, newsletter)
+
+**`tests/specs/case-studies.spec.js`** — SC19:
+- SC19: Case Studies page (page heading, post count text, K Health/Airspace/Versapay/Home Chef cards, Browse all tags link, clicking K Health card navigates)
 
 ### Adding new page coverage
 
-- New page classes should extend `BasePage`.
-- Add new locators and action methods to the relevant page class.
-- Add a new fixture property in `fixtures.js` if a new page needs auto-setup.
-- Add expected strings to `data/testData.js`; reference them in specs.
+- New page classes should extend `BasePage`, define all locators in the constructor, and implement `open()`.
+- Register a new fixture in `fixtures.js` (instantiate, call `open()`, inject iframe style tag).
+- Add expected strings to `data/testData.js`; reference them in specs rather than hardcoding.
 
 ---
 
@@ -106,7 +116,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 | Product Maintenance | `/product-maintenance` |
 | Staff Aug+ | `/staff-aug` |
 | Healthcare | `/healthcare` |
-| Airspace Data | URL contains `airspace` |
+| K Health: AI Healthcare | URL contains `k-health` |
 | Versapay | URL contains `versapay` |
 | Anthem | URL contains `anthem` |
 
