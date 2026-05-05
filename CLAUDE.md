@@ -99,8 +99,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - **Duplicate link names** (Product Lab, Product Maintenance, Staff Aug+): footer and nav both have these — use `.first()` for nav, scope with `page.locator('footer')` for footer
 - **Accordion collapsed state**: Use `toHaveCSS('height', '0px')` on content container — `toBeVisible()` won't detect hidden-via-CSS-height elements
 - **Menu animation waits**: `openNavMenu()` waits 500ms; other menu methods wait 300ms; `Escape` close waits 400ms — don't remove these or tests will flake
-- **Blog article title locators** (`firstArticleTitle`, `secondArticleTitle`, `thirdArticleTitle`) in both `home.page.js` and `blog.page.js` are hardcoded to the current top-3 articles — update them (and `data/testData.js` `blog.articles`) whenever the site's article list rotates
-- **Homepage article titles appear twice in DOM** (responsive layout duplication) — locators in `home.page.js` use `.first()` to avoid strict mode violations; `blog.page.js` does not need this since `/blog` does not duplicate them
+- **Blog article title locators** (`firstArticleTitle`, `secondArticleTitle`, `thirdArticleTitle`) use positional structural selectors — `aside a[aria-label^="Read more about"]` on the homepage and `article h3` on `/blog` — so they survive article rotations without any code changes
 
 ---
 

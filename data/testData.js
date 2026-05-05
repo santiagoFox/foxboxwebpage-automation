@@ -43,11 +43,6 @@ const testData = {
 
   blog: {
     heading: 'Inside the Box',
-    articles: [
-      'AI Native Readiness: Beyond Bolted-on AI Solutions',
-      'K Health: Powering AI-Driven Healthcare with a Personalized Cross-Platform Experience',
-      'Automated QA Testing in Claude Code',
-    ],
   },
 
   beliefs: {
