@@ -44,9 +44,9 @@ const testData = {
   blog: {
     heading: 'Inside the Box',
     articles: [
-      'The Three Agent Model: How We Approach AI-Native Development',
-      '14 Days, 76 Commits, One Production Website: What Happens When You Build With Claude Code',
-      'Why Your Cursor-Built MVP Will Break at 1,000 Users (And How to Fix It Before It Does)',
+      'AI Native Readiness: Beyond Bolted-on AI Solutions',
+      'K Health: Powering AI-Driven Healthcare with a Personalized Cross-Platform Experience',
+      'Automated QA Testing in Claude Code',
     ],
   },
 

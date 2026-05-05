@@ -102,9 +102,9 @@ class HomePage extends BasePage {
     // Inside the Box (blog)
     this.insideTheBoxHeading = page.getByText('Inside the Box');
     this.blogArticles = page.getByRole('link', { name: /READ MORE/i });
-    this.firstArticleTitle = page.getByText('The Three Agent Model: How We Approach AI-Native Development').first();
-    this.secondArticleTitle = page.getByText('14 Days, 76 Commits, One Production Website').first();
-    this.thirdArticleTitle = page.getByText(/Why Your Cursor-Built MVP Will Break/).first();
+    this.firstArticleTitle = page.getByText('AI Native Readiness: Beyond Bolted-on AI Solutions').first();
+    this.secondArticleTitle = page.getByText('K Health: Powering AI-Driven Healthcare').first();
+    this.thirdArticleTitle = page.getByText('Automated QA Testing in Claude Code').first();
 
     // What We Believe section
     this.whatWeBelieveHeading = page.getByText('What We Believe');
