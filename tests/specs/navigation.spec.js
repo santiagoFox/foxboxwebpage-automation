@@ -167,3 +167,59 @@ test.describe('SC16 - Footer Navigation Links', () => {
   });
 });
 
+test.describe('SC20 - Footer Link Health', () => {
+  async function assertLinkResolves(locator, request, label) {
+    const href = await locator.getAttribute('href');
+    const response = await request.get(href);
+    expect(
+      response.status(),
+      `Footer "${label}" → ${href} returned HTTP ${response.status()}`
+    ).toBeLessThan(400);
+  }
+
+  test('SC20-TC01 - Footer "Contact us" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerContactUs, request, 'Contact us');
+  });
+
+  test('SC20-TC02 - Footer "About" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerAbout, request, 'About');
+  });
+
+  test('SC20-TC03 - Footer "Blog" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerBlog, request, 'Blog');
+  });
+
+  test('SC20-TC04 - Footer "Careers" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerCareers, request, 'Careers');
+  });
+
+  test('SC20-TC05 - Footer "Approach" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerApproach, request, 'Approach');
+  });
+
+  test('SC20-TC06 - Footer "Culture" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerCulture, request, 'Culture');
+  });
+
+  test('SC20-TC07 - Footer "Product Lab" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerProductLab, request, 'Product Lab');
+  });
+
+  test('SC20-TC08 - Footer "Product Maintenance" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerProductMaintenance, request, 'Product Maintenance');
+  });
+
+  test('SC20-TC09 - Footer "Staff Aug+" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerStaffAug, request, 'Staff Aug+');
+  });
+
+  test('SC20-TC10 - Footer "Privacy Policy" link resolves successfully', async ({ homePage, request }) => {
+    await assertLinkResolves(homePage.footerPrivacyPolicy, request, 'Privacy Policy');
+  });
+
+  test('SC20-TC11 - Footer LinkedIn link resolves successfully', async ({ homePage, request }) => {
+    const locator = homePage.page.locator('footer a[href*="linkedin"]');
+    await assertLinkResolves(locator, request, 'LinkedIn');
+  });
+});
+

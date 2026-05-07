@@ -129,7 +129,7 @@ class HomePage extends BasePage {
     this.chatWithUsButton = page.getByText(/CHAT WITH US/i).first();
 
     // Footer
-    this.footerContactUs = page.locator('footer').getByText('Contact us').first();
+    this.footerContactUs = page.locator('footer').getByRole('link', { name: 'Contact us' });
     this.footerFollowUs = page.locator('footer').getByText('Follow Us');
     this.footerLinkedIn = page.locator('footer').getByRole('link', { name: /linkedin/i });
     this.footerAbout = page.locator('footer').getByRole('link', { name: 'About' });

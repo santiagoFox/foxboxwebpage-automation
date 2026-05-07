@@ -70,7 +70,8 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - SC13: COMPANY links (About Us, Our Work, Inside the Box)
 - SC14: SOLUTIONS links (Product Lab, Product Maintenance, Staff Aug+, Healthcare)
 - SC15: WORK links (See All Case Studies, Airspace, Versapay, Anthem)
-- SC16: Footer navigation links (About, Blog, Careers, Approach, Culture, Product Lab, Product Maintenance, Staff Aug+, Privacy Policy, LinkedIn)
+- SC16: Footer navigation links — asserts `href` attribute values (About, Blog, Careers, Approach, Culture, Product Lab, Product Maintenance, Staff Aug+, Privacy Policy, LinkedIn)
+- SC20: Footer link health — makes an HTTP GET request to every footer link href and asserts status < 400 (catches broken/404 links in nightly runs)
 
 **`tests/specs/about.spec.js`** — SC17:
 - SC17: About page (WHO WE ARE heading, hero heading/subheading, leadership team cards, WHY FOXBOX? section, CHAT WITH US CTA, What We Believe, newsletter)
