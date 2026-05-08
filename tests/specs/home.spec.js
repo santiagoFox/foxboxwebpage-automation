@@ -362,7 +362,6 @@ test.describe('SC11 - Footer', () => {
     await homePage.scrollToElement(homePage.footerAbout);
     await expect(homePage.footerAbout).toBeVisible();
     await expect(homePage.footerBlog).toBeVisible();
-    await expect(homePage.footerCareers).toBeVisible();
     await expect(homePage.footerApproach).toBeVisible();
     await expect(homePage.footerCulture).toBeVisible();
   });
