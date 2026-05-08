@@ -125,9 +125,8 @@ test.describe('SC16 - Footer Navigation Links', () => {
     await expect(homePage.footerBlog).toHaveAttribute('href', /\/blog/);
   });
 
-  test('SC16-TC03 - Footer "Careers" link points to Careers page', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.footerCareers);
-    await expect(homePage.footerCareers).toHaveAttribute('href', /gem\.com|greenhouse|jobs/i);
+  test('SC16-TC03 - Footer "Careers" link is not present', async ({ homePage }) => {
+    await expect(homePage.page.locator('footer').getByRole('link', { name: 'Careers' })).not.toBeVisible();
   });
 
   test('SC16-TC04 - Footer "Approach" link points to Approach page', async ({ homePage }) => {
@@ -187,10 +186,6 @@ test.describe('SC20 - Footer Link Health', () => {
 
   test('SC20-TC03 - Footer "Blog" link resolves successfully', async ({ homePage, request }) => {
     await assertLinkResolves(homePage.footerBlog, request, 'Blog');
-  });
-
-  test('SC20-TC04 - Footer "Careers" link resolves successfully', async ({ homePage, request }) => {
-    await assertLinkResolves(homePage.footerCareers, request, 'Careers');
   });
 
   test('SC20-TC05 - Footer "Approach" link resolves successfully', async ({ homePage, request }) => {

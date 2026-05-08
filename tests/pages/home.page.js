@@ -134,7 +134,6 @@ class HomePage extends BasePage {
     this.footerLinkedIn = page.locator('footer').getByRole('link', { name: /linkedin/i });
     this.footerAbout = page.locator('footer').getByRole('link', { name: 'About' });
     this.footerBlog = page.locator('footer').getByRole('link', { name: 'Blog' });
-    this.footerCareers = page.locator('footer').getByRole('link', { name: 'Careers' });
     this.footerApproach = page.locator('footer').getByRole('link', { name: 'Approach' });
     this.footerCulture = page.locator('footer').getByRole('link', { name: 'Culture' });
     this.footerProductLab = page.locator('footer').getByRole('link', { name: 'Product Lab' });
