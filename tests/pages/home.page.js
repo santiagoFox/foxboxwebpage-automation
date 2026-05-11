@@ -45,7 +45,7 @@ class HomePage extends BasePage {
       'How we helped evolve K Health'
     );
     this.kHealthCaseStudyLink = page
-      .getByRole('link', { name: /SEE THE CASE STUDY/i })
+      .locator('a').filter({ hasText: /see the case study/i })
       .first();
 
     // Case study: X Company
@@ -54,7 +54,7 @@ class HomePage extends BasePage {
       "How we built a custom platform to power The X Company"
     );
     this.xCompanyCaseStudyLink = page
-      .getByRole('link', { name: /SEE THE CASE STUDY/i })
+      .locator('a').filter({ hasText: /see the case study/i })
       .nth(1);
 
     // Case study: Home Chef
@@ -63,7 +63,7 @@ class HomePage extends BasePage {
       'How we helped Home Chef delight customers'
     );
     this.homeChefCaseStudyLink = page
-      .getByRole('link', { name: /SEE THE CASE STUDY/i })
+      .locator('a').filter({ hasText: /see the case study/i })
       .nth(2);
 
     // Testimonial section
