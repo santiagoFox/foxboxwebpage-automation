@@ -82,18 +82,18 @@ test.describe('SC04 - Case Studies', () => {
   });
 
   test('SC04-TC07 - K Health case study link points to K Health page', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.kHealthCaseStudyLink);
-    await expect(homePage.kHealthCaseStudyLink).toHaveAttribute('href', /k-?health/i);
+    await homePage.clickKHealthCaseStudy();
+    await expect(homePage.page).toHaveURL(/k-?health/i);
   });
 
   test('SC04-TC08 - X Company case study link points to X Company page', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.xCompanyCaseStudyLink);
-    await expect(homePage.xCompanyCaseStudyLink).toHaveAttribute('href', /x-case-study/i);
+    await homePage.clickXCompanyCaseStudy();
+    await expect(homePage.page).toHaveURL(/x-case-study/i);
   });
 
   test('SC04-TC09 - Home Chef case study link points to Home Chef page', async ({ homePage }) => {
-    await homePage.scrollToElement(homePage.homeChefCaseStudyLink);
-    await expect(homePage.homeChefCaseStudyLink).toHaveAttribute('href', /home-?chef/i);
+    await homePage.clickHomeChefCaseStudy();
+    await expect(homePage.page).toHaveURL(/home-?chef/i);
   });
 });
 
