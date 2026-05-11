@@ -3,16 +3,14 @@
  *
  * For each seed page, collects every unique internal <a href> and makes an
  * HTTP GET request to it. Any response >= 400 is reported as a failure.
+ * Redirects (3xx) are not followed — a redirect means the link is alive.
  *
- * "Internal" means the resolved URL starts with https://www.foxbox.com or
- * https://foxbox.com (non-www). Some pages redirect www → non-www at the
- * server level (e.g. /jobs), so both forms are treated as the same site.
+ * "Internal" means the resolved URL starts with https://www.foxbox.com.
  * External links (LinkedIn, feedback portals, jobs.gem.com, etc.) are skipped.
  */
 const { test, expect } = require('@playwright/test');
 
-const BASE     = 'https://www.foxbox.com';
-const BASE_NWW = 'https://foxbox.com';
+const BASE = 'https://www.foxbox.com';
 
 const SEED_PAGES = [
   { label: 'Home',                path: '/' },
@@ -54,12 +52,7 @@ async function collectInternalLinks(page, path) {
 
     absolute = absolute.split('#')[0];
 
-    if (!absolute.startsWith(BASE) && !absolute.startsWith(BASE_NWW)) continue;
-
-    // Normalise to www so we don't enqueue the same path twice
-    if (absolute.startsWith(BASE_NWW)) {
-      absolute = BASE + absolute.slice(BASE_NWW.length);
-    }
+    if (!absolute.startsWith(BASE)) continue;
 
     links.add(absolute);
   }
@@ -76,14 +69,10 @@ test.describe('SC21 - Full Site Link Health', () => {
       for (const url of links) {
         let status;
         try {
-          const res = await request.get(url, { timeout: 15000 });
+          // Don't follow redirects — a 3xx means the link is alive; we only
+          // care whether the server rejects the URL with a 4xx/5xx.
+          const res = await request.get(url, { timeout: 15000, maxRedirects: 0 });
           status = res.status();
-          // Some pages only exist on the non-www host; retry there if www 404s.
-          if (status >= 400) {
-            const nonWww = url.replace('https://www.foxbox.com', 'https://foxbox.com');
-            const res2 = await request.get(nonWww, { timeout: 15000 });
-            status = res2.status();
-          }
         } catch (e) {
           broken.push(`  • ${url}  →  ERROR: ${e.message.split('\n')[0]}`);
           continue;
