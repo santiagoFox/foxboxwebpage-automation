@@ -23,6 +23,7 @@ const SEED_PAGES = [
   { label: 'Product Lab',         path: '/product-lab' },
   { label: 'Product Maintenance', path: '/product-maintenance' },
   { label: 'Staff Aug+',          path: '/staff-aug' },
+  { label: 'Contact',             path: '/contact' },
 ];
 
 /**
