@@ -3,6 +3,7 @@ const HomePage = require('../pages/home.page');
 const AboutPage = require('../pages/about.page');
 const BlogPage = require('../pages/blog.page');
 const CaseStudiesPage = require('../pages/case-studies.page');
+const ContactPage = require('../pages/contact.page');
 
 const iframeStyle = 'iframe { pointer-events: none !important; }';
 
@@ -36,6 +37,20 @@ const test = base.extend({
     await caseStudiesPage.open();
     await page.addStyleTag({ content: iframeStyle });
     await use(caseStudiesPage);
+  },
+
+  contactPageAllCookies: async ({ page }, use) => {
+    const contactPage = new ContactPage(page);
+    await contactPage.open();
+    await contactPage.acceptAllCookies();
+    await use(contactPage);
+  },
+
+  contactPageEssentialCookies: async ({ page }, use) => {
+    const contactPage = new ContactPage(page);
+    await contactPage.open();
+    await contactPage.acceptEssentialCookies();
+    await use(contactPage);
   },
 });
 
