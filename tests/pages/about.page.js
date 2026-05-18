@@ -12,7 +12,7 @@ class AboutPage extends BasePage {
 
     // Section headings
     this.whoWeAreHeading = page.getByText('WHO WE ARE');
-    this.leadershipHeading = page.getByText('Our Leadership Team');
+    this.leadershipHeading = page.getByText('Led by Experience');
     this.whyFoxboxHeading = page.getByText('WHY FOXBOX?');
     this.ourCultureLink = page.getByRole('link', { name: /OUR CULTURE/i });
     this.whatWeBelieveHeading = page.getByText('What We Believe');
