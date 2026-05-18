@@ -4,6 +4,12 @@ const AboutPage = require('../pages/about.page');
 const BlogPage = require('../pages/blog.page');
 const CaseStudiesPage = require('../pages/case-studies.page');
 const ContactPage = require('../pages/contact.page');
+const ProductLabPage = require('../pages/product-lab.page');
+const ProductMaintenancePage = require('../pages/product-maintenance.page');
+const StaffAugmentationPage = require('../pages/staff-augmentation.page');
+const ApproachPage = require('../pages/approach.page');
+const CulturePage = require('../pages/culture.page');
+const PrivacyPage = require('../pages/privacy.page');
 
 const iframeStyle = 'iframe { pointer-events: none !important; }';
 
@@ -51,6 +57,48 @@ const test = base.extend({
     await contactPage.open();
     await contactPage.acceptEssentialCookies();
     await use(contactPage);
+  },
+
+  productLabPage: async ({ page }, use) => {
+    const productLabPage = new ProductLabPage(page);
+    await productLabPage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(productLabPage);
+  },
+
+  productMaintenancePage: async ({ page }, use) => {
+    const productMaintenancePage = new ProductMaintenancePage(page);
+    await productMaintenancePage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(productMaintenancePage);
+  },
+
+  staffAugmentationPage: async ({ page }, use) => {
+    const staffAugmentationPage = new StaffAugmentationPage(page);
+    await staffAugmentationPage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(staffAugmentationPage);
+  },
+
+  approachPage: async ({ page }, use) => {
+    const approachPage = new ApproachPage(page);
+    await approachPage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(approachPage);
+  },
+
+  culturePage: async ({ page }, use) => {
+    const culturePage = new CulturePage(page);
+    await culturePage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(culturePage);
+  },
+
+  privacyPage: async ({ page }, use) => {
+    const privacyPage = new PrivacyPage(page);
+    await privacyPage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(privacyPage);
   },
 });
 
