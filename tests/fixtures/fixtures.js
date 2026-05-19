@@ -1,5 +1,6 @@
 const { test: base } = require('@playwright/test');
 const HomePage = require('../pages/home.page');
+const AiAssessmentPage = require('../pages/ai-assessment.page');
 const AboutPage = require('../pages/about.page');
 const BlogPage = require('../pages/blog.page');
 const CaseStudiesPage = require('../pages/case-studies.page');
@@ -99,6 +100,13 @@ const test = base.extend({
     await privacyPage.open();
     await page.addStyleTag({ content: iframeStyle });
     await use(privacyPage);
+  },
+
+  aiAssessmentPage: async ({ page }, use) => {
+    const assessmentPage = new AiAssessmentPage(page);
+    await assessmentPage.open();
+    await assessmentPage.dismissCookieBanner();
+    await use(assessmentPage);
   },
 });
 
