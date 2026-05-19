@@ -9,14 +9,14 @@ class ApproachPage extends BasePage {
 
     // Section headings
     this.sevenThingsHeading = page.getByText('The 7 Things That Enable Us to Build Great Products');
-    this.hireBestPeopleHeading = page.getByText('Hire the best people (that fit our culture)');
-    this.crossFunctionalTeamsHeading = page.getByText('Flexible cross-functional product teams');
-    this.modernDigitalStrategiesHeading = page.getByText('Modern digital strategies');
-    this.humanCenteredHeading = page.getByText(/Human-centered Design, Agile/i);
-    this.delightCustomersHeading = page.getByText(/Delight customers and measure success/i);
-    this.executiveVisibilityHeading = page.getByText('Executive visibility done right');
-    this.longTermPartnershipsHeading = page.getByText('Long-term partnerships & support');
-    this.letsGetThingsDoneHeading = page.getByText("Let's Get Things Done, Together");
+    this.hireBestPeopleHeading = page.getByText('Hire the best people (that fit our culture)').first();
+    this.crossFunctionalTeamsHeading = page.getByText('Flexible cross-functional product teams').first();
+    this.modernDigitalStrategiesHeading = page.getByText('Modern digital strategies').first();
+    this.humanCenteredHeading = page.getByText(/Human-centered Design, Agile/i).first();
+    this.delightCustomersHeading = page.getByText(/Delight customers and measure success/i).first();
+    this.executiveVisibilityHeading = page.getByText('Executive visibility done right').first();
+    this.longTermPartnershipsHeading = page.getByText('Long-term partnerships & support').first();
+    this.letsGetThingsDoneHeading = page.getByText(/Let.s Get Things Done, Together/i);
 
     // Testimonials
     this.plamenPetrovQuote = page.getByText(/Foxbox operated as a startup/i);
