@@ -17,6 +17,11 @@ class ProductLabPage extends BasePage {
     this.aimIndispensableHeading = page.getByRole('heading', { name: /AIM FOR.*INDISPENSABLE/i });
     this.readyToBuildHeading = page.getByText('Ready to get building?');
 
+    // Skill items within service sections (skillObject embedded via serviceObject) — FOX2-42
+    this.skillProductStrategy = page.getByText('Product strategy');
+    this.skillUserResearch = page.getByText('User research');
+    this.skillUxUiDesign = page.getByText(/UX \/ UI design/i);
+
     // Case study link
     this.airspaceCaseStudyLink = page.getByText(/Airspace case study/i);
 

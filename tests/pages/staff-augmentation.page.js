@@ -15,6 +15,10 @@ class StaffAugmentationPage extends BasePage {
     this.techStackHeading = page.getByText('Our Tech Stack');
     this.wantToLearnMoreHeading = page.getByText('Want to learn more?');
 
+    // Tech stack skill items (skillObject embedded via serviceObject) — FOX2-42
+    this.techStackiOS = page.getByText('iOS: Swift, Objective-C');
+    this.techStackReactJs = page.getByText('React.js, Next.js, Remix');
+
     // CTAs
     this.getInTouchLink = page.getByRole('link', { name: /Get in touch/i }).first();
     this.goToProductLabLink = page.getByText(/Go to Product Lab/i);

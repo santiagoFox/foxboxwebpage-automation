@@ -21,7 +21,12 @@ class AboutPage extends BasePage {
     // Leadership team cards
     this.robVolkCard = page.getByText('Rob Volk');
     this.elliottTorresCard = page.getByText('Elliott Torres');
+    this.trentEdwardsCard = page.getByText('Trent Edwards');
     this.barrettWillichCard = page.getByText('Barrett Willich');
+
+    // Team member roles (profile schema data) — FOX2-42
+    this.robVolkRole = page.getByText('Founder & CEO');
+    this.elliottTorresRole = page.getByText(/Chief Technology Officer/i).first();
 
     // CTA — same pattern as home page; element is not an <a role="link">
     this.chatWithUsButton = page.getByText(/CHAT WITH US/i).first();
