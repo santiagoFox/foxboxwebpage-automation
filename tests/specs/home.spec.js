@@ -95,6 +95,35 @@ test.describe('SC04 - Case Studies', () => {
     await homePage.clickHomeChefCaseStudy();
     await expect(homePage.page).toHaveURL(/home-?chef/i);
   });
+
+  // FOX2-64 regression: case study cards were previously hardcoded to point at
+  // www.foxbox.com and localhost:3000. The visible "See the case study" anchor
+  // has no href — navigation is JS-driven from __NEXT_DATA__.caseCompanyUrl,
+  // so we assert the data layer directly.
+  test('SC04-TC10 - Case study URLs are relative paths (no hardcoded host)', async ({ homePage }) => {
+    const urls = await homePage.page.evaluate(() => {
+      const el = document.getElementById('__NEXT_DATA__');
+      if (!el || !el.textContent) return [];
+      const collect = (node, out) => {
+        if (!node || typeof node !== 'object') return;
+        if (Array.isArray(node)) { node.forEach((n) => collect(n, out)); return; }
+        for (const [k, v] of Object.entries(node)) {
+          if (k === 'caseCompanyUrl' && typeof v === 'string') out.push(v);
+          else collect(v, out);
+        }
+      };
+      const out = [];
+      collect(JSON.parse(el.textContent), out);
+      return out;
+    });
+
+    expect(urls.length, 'expected at least one case study URL in __NEXT_DATA__').toBeGreaterThan(0);
+    const offenders = urls.filter(
+      (u) => /https?:\/\/www\.foxbox\.com/i.test(u) || /https?:\/\/localhost(:\d+)?/i.test(u)
+    );
+    expect(offenders, `Case study URLs with hardcoded host: ${JSON.stringify(offenders)}`).toEqual([]);
+    for (const u of urls) expect(u, `caseCompanyUrl should be relative: ${u}`).toMatch(/^\//);
+  });
 });
 
 test.describe('SC05 - Testimonial Section', () => {
