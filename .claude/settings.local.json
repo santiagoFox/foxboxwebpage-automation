@@ -8,7 +8,11 @@
       "Bash(gh auth:*)",
       "Bash(git commit:*)",
       "Bash(git add:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(curl -s \"https://www.foxbox.com/blog\")",
+      "WebFetch(domain:www.foxbox.com)",
+      "Bash(gh workflow *)",
+      "Bash(npm test *)"
     ]
   }
 }
