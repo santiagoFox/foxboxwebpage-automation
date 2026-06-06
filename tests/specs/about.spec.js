@@ -15,7 +15,7 @@ test.describe('SC17 - About Page', () => {
     await expect(aboutPage.heroSubheading).toBeVisible();
   });
 
-  test('SC17-TC04 - "Our Leadership Team" heading is visible', async ({ aboutPage }) => {
+  test('SC17-TC04 - "Led by Experience" heading is visible', async ({ aboutPage }) => {
     await aboutPage.scrollToElement(aboutPage.leadershipHeading);
     await expect(aboutPage.leadershipHeading).toBeVisible();
   });

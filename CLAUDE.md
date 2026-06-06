@@ -32,6 +32,21 @@ npx playwright test --grep "SC11-TC07"
 
 ---
 
+## Directory structure
+
+```
+tests/
+  specs/       ← spec files (home, navigation, about, blog, case-studies)
+  pages/       ← page object classes (base.page.js + one per page)
+  fixtures/    ← fixtures.js (extends test with page fixtures)
+data/          ← testData.js (expected strings/values for assertions)
+playwright.config.js
+```
+
+`data/` is at the project root, not inside `tests/`.
+
+---
+
 ## Architecture
 
 ### How the pieces connect
@@ -87,6 +102,17 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - New page classes should extend `BasePage`, define all locators in the constructor, and implement `open()`.
 - Register a new fixture in `fixtures.js` (instantiate, call `open()`, inject iframe style tag).
 - Add expected strings to `data/testData.js`; reference them in specs rather than hardcoding.
+
+---
+
+## Locator strategy — priority order
+
+1. `getByRole(role, { name })` — most preferred
+2. `getByText(text)` / `getByAltText(text)` — for content assertions or image alts
+3. `getByPlaceholder(text)` — for form inputs
+4. `locator('css selector')` — fallback (e.g. `.accordion-item-content`)
+
+Avoid XPath. Scope ambiguous locators with `page.locator('footer')` or use `.first()` / `.nth()`.
 
 ---
 

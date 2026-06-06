@@ -5,12 +5,12 @@
  * HTTP GET request to it. Any response >= 400 is reported as a failure.
  * Redirects (3xx) are not followed — a redirect means the link is alive.
  *
- * "Internal" means the resolved URL starts with https://www.foxbox.com.
+ * "Internal" means the resolved URL starts with https://staging.foxbox.com.
  * External links (LinkedIn, feedback portals, jobs.gem.com, etc.) are skipped.
  */
 const { test, expect } = require('@playwright/test');
 
-const BASE = 'https://www.foxbox.com';
+const BASE = 'https://staging.foxbox.com';
 
 const SEED_PAGES = [
   { label: 'Home',                path: '/' },

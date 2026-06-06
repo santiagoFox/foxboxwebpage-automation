@@ -12,7 +12,7 @@ module.exports = defineConfig({
     ['html', { outputFolder: 'reports/html', open: 'never' }],
   ],
   use: {
-    baseURL: 'https://www.foxbox.com',
+    baseURL: 'https://staging.foxbox.com',
     headless: true,
     viewport: { width: 1440, height: 900 },
     screenshot: 'only-on-failure',
