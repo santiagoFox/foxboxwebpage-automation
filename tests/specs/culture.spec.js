@@ -16,10 +16,8 @@ test.describe('SC28 - Culture Page', () => {
     await expect(culturePage.foxboxWayHeading).toBeVisible();
   });
 
-  test('SC28-TC04 - "We are Hiring!" section heading is visible', async ({ culturePage }) => {
-    await culturePage.scrollToElement(culturePage.weAreHiringHeading);
-    await expect(culturePage.weAreHiringHeading).toBeVisible();
-  });
+  // SC28-TC04 (We are Hiring! heading) removed — hiring section deleted from
+  // /about/culture per FOX2-56 (Maxx's call: revamp later with proper jobs link).
 
   test('SC28-TC05 - "What We Believe" section heading is visible', async ({ culturePage }) => {
     await culturePage.scrollToElement(culturePage.whatWeBelieveHeading);
@@ -36,10 +34,7 @@ test.describe('SC28 - Culture Page', () => {
     await expect(culturePage.belief6).toBeVisible();
   });
 
-  test('SC28-TC07 - "WORK WITH US" hiring CTA link is visible', async ({ culturePage }) => {
-    await culturePage.scrollToElement(culturePage.workWithUsLink);
-    await expect(culturePage.workWithUsLink).toBeVisible();
-  });
+  // SC28-TC07 (WORK WITH US CTA link) removed — same FOX2-56 section deletion.
 
   test('SC28-TC08 - Newsletter signup input and button are present', async ({ culturePage }) => {
     await culturePage.scrollToElement(culturePage.newsletterInput);

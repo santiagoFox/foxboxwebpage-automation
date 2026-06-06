@@ -10,7 +10,7 @@ const { test } = require('../fixtures/fixtures');
 test.describe('SC34 - Studio Content Cleanup (FOX2-40)', () => {
 
   test('SC34-TC01 - /testforlayouts route returns 404', async ({ request }) => {
-    const res = await request.get('https://www.foxbox.com/testforlayouts', { maxRedirects: 5 });
+    const res = await request.get('/testforlayouts', { maxRedirects: 5 });
     expect(res.status()).toBe(404);
   });
 
@@ -24,22 +24,22 @@ test.describe('SC34 - Studio Content Cleanup (FOX2-40)', () => {
   });
 
   test('SC34-TC03 - /services/react-native-consulting orphaned page returns 404', async ({ request }) => {
-    const res = await request.get('https://www.foxbox.com/services/react-native-consulting', { maxRedirects: 5 });
+    const res = await request.get('/services/react-native-consulting', { maxRedirects: 5 });
     expect(res.status()).toBe(404);
   });
 
   test('SC34-TC04 - /services/react-native-mobile-app-development orphaned page returns 404', async ({ request }) => {
-    const res = await request.get('https://www.foxbox.com/services/react-native-mobile-app-development', { maxRedirects: 5 });
+    const res = await request.get('/services/react-native-mobile-app-development', { maxRedirects: 5 });
     expect(res.status()).toBe(404);
   });
 
   test('SC34-TC05 - /services/elixir-web-development-services orphaned page returns 404', async ({ request }) => {
-    const res = await request.get('https://www.foxbox.com/services/elixir-web-development-services', { maxRedirects: 5 });
+    const res = await request.get('/services/elixir-web-development-services', { maxRedirects: 5 });
     expect(res.status()).toBe(404);
   });
 
   test('SC34-TC06 - /services/elixir-consulting-services orphaned page returns 404', async ({ request }) => {
-    const res = await request.get('https://www.foxbox.com/services/elixir-consulting-services', { maxRedirects: 5 });
+    const res = await request.get('/services/elixir-consulting-services', { maxRedirects: 5 });
     expect(res.status()).toBe(404);
   });
 

@@ -10,7 +10,6 @@ class CulturePage extends BasePage {
     // Section headings
     this.movePurposelyHeading = page.getByText('Move Purposely.');
     this.foxboxWayHeading = page.getByText('The Foxbox Way');
-    this.weAreHiringHeading = page.getByText('We are Hiring!');
     this.whatWeBelieveHeading = page.getByText('What We Believe');
 
     // Core beliefs
@@ -23,7 +22,6 @@ class CulturePage extends BasePage {
 
     // CTAs
     this.readMoreLink = page.getByRole('link', { name: /READ MORE/i }).first();
-    this.workWithUsLink = page.getByRole('link', { name: /WORK WITH US/i });
     this.contactUsLink = page.getByRole('link', { name: /Contact us/i }).first();
 
     // Newsletter (footer)
