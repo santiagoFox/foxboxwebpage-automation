@@ -20,6 +20,10 @@ class CulturePage extends BasePage {
     this.belief5 = page.getByText('Be a puzzle solver, not a code factory.');
     this.belief6 = page.getByText('Deep focus, always');
 
+    // FOX2-56 — hiring section removed; these locators exist for negative assertions only
+    this.hiringHeading = page.getByText(/we are hiring/i);
+    this.jobsLink = page.locator('a[href*="/jobs"]');
+
     // CTAs
     this.readMoreLink = page.getByRole('link', { name: /READ MORE/i }).first();
     this.contactUsLink = page.getByRole('link', { name: /Contact us/i }).first();
