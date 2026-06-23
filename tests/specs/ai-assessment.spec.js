@@ -140,7 +140,13 @@ test.describe('SC32 - AI Assessment Form Step', () => {
   });
 });
 
-test.describe('SC33 - AI Assessment Results', () => {
+// SKIPPED — STOP LEAD CREATION: these tests call fillAndSubmitForm(), which
+// SUBMITS the live AI Readiness Assessment form on staging. Each run created
+// real HubSpot leads (Alex Test / Morgan Test / Jane Smith x2, Score 100/100)
+// that fired #sales-inbound Slack alerts. Disabled to stop the bleeding.
+// DO NOT re-enable against the live form — restore coverage only via a network
+// mock that intercepts the submission so no lead is created.
+test.describe.skip('SC33 - AI Assessment Results', () => {
 
   test('SC33-TC01 - Completing the form shows "Your AI Readiness Results" in nav', async ({ aiAssessmentPage }) => {
     // STEP 1: Complete the full questionnaire
