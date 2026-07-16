@@ -4,6 +4,7 @@ const AiAssessmentPage = require('../pages/ai-assessment.page');
 const AboutPage = require('../pages/about.page');
 const BlogPage = require('../pages/blog.page');
 const CaseStudiesPage = require('../pages/case-studies.page');
+const CaseStudyDetailPage = require('../pages/case-study-detail.page');
 const ContactPage = require('../pages/contact.page');
 const ProductLabPage = require('../pages/product-lab.page');
 const ProductMaintenancePage = require('../pages/product-maintenance.page');
@@ -44,6 +45,13 @@ const test = base.extend({
     await caseStudiesPage.open();
     await page.addStyleTag({ content: iframeStyle });
     await use(caseStudiesPage);
+  },
+
+  caseStudyDetailPage: async ({ page }, use) => {
+    const caseStudyDetailPage = new CaseStudyDetailPage(page);
+    await caseStudyDetailPage.open();
+    await page.addStyleTag({ content: iframeStyle });
+    await use(caseStudyDetailPage);
   },
 
   contactPageAllCookies: async ({ page }, use) => {
