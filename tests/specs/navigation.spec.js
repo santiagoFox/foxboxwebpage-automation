@@ -42,7 +42,8 @@ test.describe('SC13 - Navigation Menu - COMPANY Links', () => {
     await homePage.openNavMenu();
     await homePage.navOurWork.click();
     await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/tags\/case-studies/);
+    // FOX2-129: nav link migrated from /tags/case-studies to /case-studies.
+    await expect(homePage.page).toHaveURL(/\/case-studies$/);
   });
 
   test('SC13-TC03 - "Inside the Box" navigates to Blog page', async ({ homePage }) => {
@@ -88,29 +89,30 @@ test.describe('SC15 - Navigation Menu - WORK Links', () => {
     await homePage.openNavMenu();
     await homePage.navSeeAllCaseStudies.click();
     await homePage.page.waitForLoadState('load');
-    // Actual URL is /tags/case-studies
-    await expect(homePage.page).toHaveURL(/tags\/case-studies/);
+    // FOX2-129: migrated from /tags/case-studies to /case-studies.
+    await expect(homePage.page).toHaveURL(/\/case-studies$/);
   });
 
   test('SC15-TC02 - "K Health: AI Healthcare" navigates to K Health case study', async ({ homePage }) => {
     await homePage.openNavMenu();
     await homePage.navKHealth.click();
     await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/k-health/i);
+    // FOX2-94: featured case-study links now live under /case-studies/ (was /blog/).
+    await expect(homePage.page).toHaveURL(/\/case-studies\/.*k-health/i);
   });
 
   test('SC15-TC03 - "Versapay: Digital Payments Mobile Strategy" navigates to Versapay case study', async ({ homePage }) => {
     await homePage.openNavMenu();
     await homePage.navVersapay.click();
     await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/versapay/i);
+    await expect(homePage.page).toHaveURL(/\/case-studies\/.*versapay/i);
   });
 
   test('SC15-TC04 - "Anthem: Telehealth Mobile App" navigates to Anthem case study', async ({ homePage }) => {
     await homePage.openNavMenu();
     await homePage.navAnthem.click();
     await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/anthem/i);
+    await expect(homePage.page).toHaveURL(/\/case-studies\/.*anthem/i);
   });
 });
 
@@ -215,6 +217,37 @@ test.describe('SC20 - Footer Link Health', () => {
   test('SC20-TC11 - Footer LinkedIn link resolves successfully', async ({ homePage, request }) => {
     const locator = homePage.page.locator('footer a[href*="linkedin"]');
     await assertLinkResolves(locator, request, 'LinkedIn');
+  });
+});
+
+// SC41 — FOX2-129: the nav (hamburger menu) document was updated so its case-study
+// links point at /case-studies instead of the old /tags/case-studies and /blog/*
+// URLs. Asserting the href attribute directly (not just the post-redirect URL) so a
+// regression to the old target is caught even though the old paths still redirect.
+test.describe('SC41 - Navigation menu case-study links point to /case-studies (FOX2-129)', () => {
+  test('SC41-TC01 - "Our Work" href is /case-studies', async ({ homePage }) => {
+    await homePage.openNavMenu();
+    await expect(homePage.navOurWork).toHaveAttribute('href', '/case-studies');
+  });
+
+  test('SC41-TC02 - "See All Case Studies" href is /case-studies', async ({ homePage }) => {
+    await homePage.openNavMenu();
+    await expect(homePage.navSeeAllCaseStudies).toHaveAttribute('href', '/case-studies');
+  });
+
+  test('SC41-TC03 - "K Health" featured link href is under /case-studies/', async ({ homePage }) => {
+    await homePage.openNavMenu();
+    await expect(homePage.navKHealth).toHaveAttribute('href', /^\/case-studies\/.*k-health/i);
+  });
+
+  test('SC41-TC04 - "Versapay" featured link href is under /case-studies/', async ({ homePage }) => {
+    await homePage.openNavMenu();
+    await expect(homePage.navVersapay).toHaveAttribute('href', /^\/case-studies\/.*versapay/i);
+  });
+
+  test('SC41-TC05 - "Anthem" featured link href is under /case-studies/', async ({ homePage }) => {
+    await homePage.openNavMenu();
+    await expect(homePage.navAnthem).toHaveAttribute('href', /^\/case-studies\/.*anthem/i);
   });
 });
 
