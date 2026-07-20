@@ -11,8 +11,6 @@ class CaseStudiesPage extends BasePage {
       .getByRole('heading', { name: /what we.ve built and how we.ve built it/i })
       .first();
 
-    // Case study cards (partial text matches for resilience). Airspace is no
-    // longer in the listing; Anthem covers that slot.
     // Cards shown on the prod /case-studies index. Anthem and Home Chef have live
     // detail pages (see SC40) but are NOT surfaced on the index listing, so the
     // specific-card checks use Airspace and Freshpaint, which are listed.
