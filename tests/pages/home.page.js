@@ -36,7 +36,7 @@ class HomePage extends BasePage {
     // Welcome section
     this.welcomeHeading = page.getByText('Welcome to Foxbox.');
     this.welcomeBody = page.getByText(
-      /Foxbox Digital is a Chicago-based digital product agency/
+      /Foxbox Digital is a Chicago-born digital product agency/
     );
 
     // Case study: K Health

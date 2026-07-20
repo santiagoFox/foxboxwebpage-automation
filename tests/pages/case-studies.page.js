@@ -13,10 +13,13 @@ class CaseStudiesPage extends BasePage {
 
     // Case study cards (partial text matches for resilience). Airspace is no
     // longer in the listing; Anthem covers that slot.
+    // Cards shown on the prod /case-studies index. Anthem and Home Chef have live
+    // detail pages (see SC40) but are NOT surfaced on the index listing, so the
+    // specific-card checks use Airspace and Freshpaint, which are listed.
     this.kHealthCard = page.getByText('K Health: Powering AI-Driven Healthcare').first();
-    this.anthemCard = page.getByText(/Anthem/i).first();
+    this.airspaceCard = page.getByText(/Airspace/i).first();
     this.versapayCard = page.getByText(/Versapay.*Mobile Strategy/i);
-    this.homeChefCard = page.getByText(/Home Chef/i).first();
+    this.freshpaintCard = page.getByText(/Freshpaint/i).first();
 
     // Case study cards — every card links to a /case-studies/<slug> detail page.
     // Used to measure how many cards the listing currently shows (for filter tests).
