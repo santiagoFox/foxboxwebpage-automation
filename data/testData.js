@@ -1,5 +1,5 @@
 const testData = {
-  url: 'https://staging.foxbox.com',
+  url: 'https://www.foxbox.com',
   pageTitle: 'Foxbox Digital | Digital Products',
 
   hero: {

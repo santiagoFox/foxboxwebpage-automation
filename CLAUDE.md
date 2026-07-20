@@ -87,6 +87,7 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - SC15: WORK links (See All Case Studies, Airspace, Versapay, Anthem)
 - SC16: Footer navigation links — asserts `href` attribute values (About, Blog, Careers, Approach, Culture, Product Lab, Product Maintenance, Staff Aug+, Privacy Policy, LinkedIn)
 - SC20: Footer link health — makes an HTTP GET request to every footer link href and asserts status < 400 (catches broken/404 links in nightly runs)
+- SC41: Nav case-study link hrefs (FOX2-129) — asserts Our Work + See All Case Studies point to `/case-studies` and the K Health/Versapay/Anthem featured links point under `/case-studies/*`
 
 **`tests/specs/about.spec.js`** — SC17:
 - SC17: About page (WHO WE ARE heading, hero heading/subheading, leadership team cards, WHY FOXBOX? section, CHAT WITH US CTA, What We Believe, newsletter)
@@ -95,7 +96,25 @@ Test IDs follow `SC<suite>-TC<case>` format. Use `--grep "SC12"` to run a whole 
 - SC18: Blog page (Inside the Box heading, subheading, article count ≥ 3, first/second/third article title, Read More URL pattern, clicking first article navigates, pagination Next link, newsletter)
 
 **`tests/specs/case-studies.spec.js`** — SC19:
-- SC19: Case Studies page (page heading, post count text, K Health/Airspace/Versapay/Home Chef cards, Browse all tags link, clicking K Health card navigates)
+- SC19: Case Studies page (page heading, K Health/Anthem/Versapay/Home Chef cards, clicking K Health card navigates)
+
+### Production deploy verification (qa-deploy-2026-07-20)
+
+These suites verify the case-study migration + content-cleanup deploy. Redirect
+assertions live in **`tests/utils/http.js`** (`assertPermanentRedirect`,
+`assertRedirectResolves`, `assertPageLive`).
+
+- **`tests/specs/team-profiles.spec.js`** — SC37 (FOX2-101): 5 orphaned `/team-profiles/*` permanently redirect to `/about/us` (no loop); `rob-volk` + `elliott-torres` stay live.
+- **`tests/specs/tag-redirects.spec.js`** — SC38 (FOX2-102): `/tags/case-studies` → `/case-studies`; 11 retired tags + `/tags` index → `/blog`; active tag stays live.
+- **`tests/specs/case-study-redirects.spec.js`** — SC39 + SC40 (FOX2-94): 12 old `/blog/*` case-study URLs → `/case-studies/*` (SC39); 13 detail pages + index live (SC40).
+- **`tests/specs/case-study-filters.spec.js`** — SC42 (FOX2-94): Industry/Offering/Technology filters open, list renamed + Hardware-group taxonomies, and narrow the listing without errors.
+
+**Redirect status codes**: the server issues **HTTP 308**. `PERMANENT_REDIRECT_CODES`
+in `tests/utils/http.js` accepts `[301, 308]`; narrow it to `[308]` to make it strict.
+
+**Reliability**: never gate on a raw 200 from `request.get()` — this site soft-404s
+(HTTP 200 + "Page Not Found" body) and some live pages 404 to a raw GET. `assertPageLive`
+gates on the rendered "Page Not Found" UI instead. Redirect *status* from `request.get(..., {maxRedirects: 0})` is reliable (edge/CDN).
 
 ### Adding new page coverage
 
@@ -135,16 +154,16 @@ Avoid XPath. Scope ambiguous locators with `page.locator('footer')` or use `.fir
 | Menu Link | URL pattern |
 |---|---|
 | About Us | `/about` |
-| Our Work | `/tags/case-studies` |
+| Our Work | `/case-studies` (FOX2-129 — migrated from `/tags/case-studies`) |
 | Inside the Box | `/blog` |
 | Careers | `jobs.gem.com/foxbox-digital` (external) |
 | Product Lab | `/product-lab` |
 | Product Maintenance | `/product-maintenance` |
 | Staff Aug+ | `/staff-aug` |
 | Healthcare | `/healthcare` |
-| K Health: AI Healthcare | URL contains `k-health` |
-| Versapay | URL contains `versapay` |
-| Anthem | URL contains `anthem` |
+| K Health: AI Healthcare | `/case-studies/*k-health*` (FOX2-94 — was `/blog/*`) |
+| Versapay | `/case-studies/*versapay*` (FOX2-94 — was `/blog/*`) |
+| Anthem | `/case-studies/*anthem*` (FOX2-94 — was `/blog/*`) |
 
 ---
 

@@ -53,13 +53,14 @@ test.describe('SC34 - Studio Content Cleanup (FOX2-40)', () => {
     expect(res.status()).toBe(404);
   });
 
-  test('SC34-TC02 - "See All Case Studies" nav link uses relative path /tags/case-studies', async ({ homePage }) => {
+  test('SC34-TC02 - "See All Case Studies" nav link uses relative path /case-studies', async ({ homePage }) => {
     // STEP 1: Open the hamburger nav menu
     await homePage.openNavMenu();
 
-    // STEP 2: Verify href is relative — not the previous absolute https://www.foxbox.com/tags/case-studies
+    // STEP 2: Verify href is the relative, migrated path — not the previous absolute
+    // https://www.foxbox.com/tags/case-studies nor the old /tags/case-studies (FOX2-129).
     const href = await homePage.navSeeAllCaseStudies.getAttribute('href');
-    expect(href).toBe('/tags/case-studies');
+    expect(href).toBe('/case-studies');
   });
 
   // TC03–06: orphaned /services pages must show "Page Not Found" (not restored — FOX2-100).
