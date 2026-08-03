@@ -36,6 +36,16 @@ const SITES = [
     // apex 308 -> www
     redirectFrom: 'https://foxbox.com',
     canonicalSamplePaths: ['/', '/blog', '/services/product-lab'],
+
+    // WARNING(FOX2-155): that ticket is "Fix www redirect direction — foxbox.com
+    // should be primary", i.e. the intended fix FLIPS this to www 301 -> apex.
+    // When it lands, swap these two values or the redirect-direction check pages a
+    // false alarm on a correctly-configured site — and a monitor that cries wolf on
+    // day one is the failure mode this whole file exists to prevent.
+    //   origin:       'https://foxbox.com'
+    //   redirectFrom: 'https://www.foxbox.com'
+    // The canonical checks need no change: tags already point at the apex, which is
+    // exactly why they start passing once the apex becomes primary.
   },
   {
     key: 'stormwind',
