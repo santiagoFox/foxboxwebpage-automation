@@ -6,7 +6,8 @@
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:debug": "npx playwright test --debug",
-    "report": "npx playwright show-report reports/html"
+    "report": "npx playwright show-report reports/html",
+    "monitor": "node scripts/check-indexing.mjs"
   },
   "keywords": [],
   "author": "",

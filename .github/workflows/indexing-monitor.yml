@@ -1,0 +1,131 @@
+name: indexing-monitor
+
+# External guard for FOX2-154 (production served `Disallow: /` for ~5.5 weeks,
+# 2026-06-19 to 2026-07-28, and nothing noticed).
+#
+# Deliberately SEPARATE from nightly.yml. The nightly runs 86 Playwright tests and
+# posts one pass/fail line to Slack, so a deindexing event would look identical to
+# a flaky locator. This workflow does one thing, runs hourly instead of daily, and
+# alerts with the failing assertion in the message.
+#
+# It is external to the *Vercel deploy pipeline* — it black-box curls production on
+# a schedule and would have caught PR #184 within the hour. It is NOT external to
+# this repo: the same PR flow that shipped the bug could disable this file. That is
+# accepted risk, recorded in the FOX2-154 postmortem; migrating to an off-repo
+# monitor is the follow-up.
+#
+# SETUP REQUIRED: the `SLACK_WEBHOOK_URL_INDEXING` secret must point at the alert
+# channel. It is intentionally a different secret from the nightly's
+# SLACK_WEBHOOK_URL so this alert can go somewhere people actually read.
+
+on:
+  schedule:
+    - cron: '17 * * * *'   # hourly at :17 — off the top of the hour, which is the
+                           # busiest slot on GH Actions' shared scheduler
+  workflow_dispatch:
+
+# Never let a slow run pile up on top of the next scheduled one.
+concurrency:
+  group: indexing-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: robots.txt + X-Robots-Tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # No `npm ci` and no browser install on purpose: the script is
+      # dependency-free so this check keeps working when the repo's tooling breaks.
+
+      - name: Check production indexability
+        id: check
+        run: |
+          set +e
+          node scripts/check-indexing.mjs 2>&1 | tee monitor-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      # Warnings are non-gating by design (see CANONICAL_TIER in the script), so they
+      # must not page the channel — but they should not be invisible either. They land
+      # in the run summary and the uploaded artifact.
+      - name: Surface warnings in the run summary
+        if: always()
+        run: |
+          {
+            echo '## Indexing monitor'
+            echo '```'
+            cat monitor-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if grep -q '^  WARN' monitor-output.txt; then
+            echo "::warning::Non-gating indexing warnings present — see the run summary (FOX2-155)."
+          fi
+
+      - name: Notify Slack on failure
+        if: steps.check.outputs.exit_code != '0'
+        env:
+          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_INDEXING }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "::error::SLACK_WEBHOOK_URL_INDEXING is not set — checks failed but nobody was alerted."
+            exit 1
+          fi
+
+          # Built with jq --rawfile rather than a heredoc: the script output contains
+          # quotes, slashes and newlines that would produce invalid JSON if templated.
+          jq -n \
+            --rawfile output monitor-output.txt \
+            --arg run_url "$RUN_URL" \
+            '{
+              text: "🚨 INDEXING ALERT: production may be deindexed",
+              blocks: [
+                {
+                  type: "header",
+                  text: { type: "plain_text", text: "🚨 Indexing check FAILED" }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: "A production indexability assertion is failing. This is the FOX2-154 failure mode: the site stays up and looks fine while dropping out of Google.\n\n*Check `robots.txt` and the `X-Robots-Tag` header before anything else.*"
+                  }
+                },
+                {
+                  type: "section",
+                  text: { type: "mrkdwn", text: ("```" + ($output | .[0:2600]) + "```") }
+                },
+                {
+                  type: "section",
+                  text: { type: "mrkdwn", text: ("<" + $run_url + "|View full run>") }
+                }
+              ]
+            }' > payload.json
+
+          curl -sS --fail-with-body -X POST \
+            -H 'Content-Type: application/json' \
+            --data @payload.json \
+            "$WEBHOOK"
+
+      - name: Fail the job if any check failed
+        if: steps.check.outputs.exit_code != '0'
+        run: |
+          echo "::error::Indexing checks failed — see the Slack alert and the log above."
+          exit 1
+
+      - name: Upload monitor output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: indexing-monitor-${{ github.run_number }}
+          path: monitor-output.txt
+          retention-days: 30
