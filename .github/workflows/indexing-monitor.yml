@@ -23,6 +23,11 @@ on:
     - cron: '17 * * * *'   # hourly at :17 — off the top of the hour, which is the
                            # busiest slot on GH Actions' shared scheduler
   workflow_dispatch:
+    inputs:
+      test_alert:
+        description: 'Send a test message to Slack to prove the alert path works'
+        type: boolean
+        default: false
 
 # Never let a slow run pile up on top of the next scheduled one.
 concurrency:
@@ -38,6 +43,47 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # This workflow only posts to Slack on failure, which means a healthy run and a
+      # broken webhook look identical: silence. A wrong secret, a revoked app or a
+      # typo'd channel would only surface at the exact moment it mattered — the same
+      # silent-failure-behind-a-green-surface shape as the FOX2-154 incident itself.
+      #
+      # Run this workflow manually with `test_alert` checked to prove the path
+      # end-to-end. Re-run it whenever the secret or channel changes.
+      #
+      # No `<!here>` here on purpose: pinging the channel for tests is how people
+      # learn to ignore the ping. This verifies delivery, not the mention.
+      - name: Send test alert
+        if: github.event_name == 'workflow_dispatch' && inputs.test_alert
+        env:
+          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_INDEXING }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "::error::SLACK_WEBHOOK_URL_INDEXING is not set — this is exactly what the test is for."
+            exit 1
+          fi
+
+          jq -n --arg actor "$ACTOR" '{
+            text: "Indexing monitor: test alert",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: (":white_check_mark: *Indexing monitor test alert*\nThe webhook works and this is the channel real alerts land in. Triggered manually by `" + $actor + "` — nothing is wrong.\n\nA real alert looks different: red header, the failing assertion inline, and it pings `@here`.")
+                }
+              }
+            ]
+          }' > test-payload.json
+
+          curl -sS --fail-with-body -X POST \
+            -H 'Content-Type: application/json' \
+            --data @test-payload.json \
+            "$WEBHOOK"
+
+          echo "Test alert delivered. Confirm it arrived in the expected channel."
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -97,7 +143,12 @@ jobs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: "A production indexability assertion is failing. This is the FOX2-154 failure mode: the site stays up and looks fine while dropping out of Google.\n\n*Check `robots.txt` and the `X-Robots-Tag` header before anything else.*"
+                    # <!here> is Slack mention syntax and only fires on gating failures —
+                    # never on warnings, and never on the test alert. Volume is near zero
+                    # by design (silent on success), so a ping here is justified: every
+                    # message this step sends means production may be dropping out of
+                    # Google, and the last one went unnoticed for 5.5 weeks.
+                    text: "<!here> A production indexability assertion is failing. This is the FOX2-154 failure mode: the site stays up and looks fine while dropping out of Google.\n\n*Check `robots.txt` and the `X-Robots-Tag` header before anything else.*"
                   }
                 },
                 {
