@@ -16,12 +16,31 @@
  * benign `Disallow: /some-new-path` addition and gets muted within a month. The
  * failure mode we care about is narrow and known, so it is asserted directly.
  *
- * Usage:
- *   node scripts/check-indexing.mjs              # all sites
- *   node scripts/check-indexing.mjs foxbox       # one site by key
- *   node scripts/check-indexing.mjs --json       # machine-readable output
+ * TWO INDEPENDENT MECHANISMS, because they catch different things (FOX2-156):
  *
- * Exit codes: 0 = all checks passed, 1 = at least one FAIL, 2 = script error.
+ *   1. Assertions (default mode) — "is production in a known-good state?" Gating
+ *      failures page the on-call. Narrow, opinionated, near-zero false positives.
+ *
+ *   2. Snapshot + diff (`--snapshot`) — "did anything change since last hour?"
+ *      Reports before/after for ANY change to robots.txt or the X-Robots-Tag
+ *      header, including changes no assertion anticipates. Non-paging by design:
+ *      a scoped `Disallow: /new-path` is a legitimate edit, and paging on it is
+ *      how a monitor earns a mute. The diff is the audit trail the June incident
+ *      lacked — nobody could say when robots.txt changed or what it said before.
+ *
+ * Neither replaces the other. Assertions catch the known-catastrophic; the diff
+ * catches the unanticipated.
+ *
+ * Usage:
+ *   node scripts/check-indexing.mjs              # assert all sites
+ *   node scripts/check-indexing.mjs foxbox       # one site by key
+ *   node scripts/check-indexing.mjs --json       # machine-readable assertions
+ *   node scripts/check-indexing.mjs --snapshot   # emit indexing-state JSON to stdout
+ *   node scripts/check-indexing.mjs --force-failure   # inject a synthetic gating
+ *                                                     # failure to exercise alerting
+ *
+ * Exit codes: 0 = all gating checks passed, 1 = at least one gating FAIL,
+ * 2 = script error.
  */
 
 // Canonical host per site, verified 2026-08-03. These do NOT agree — foxbox and
@@ -316,10 +335,90 @@ async function checkBlockedHost(host) {
 const hostOf = (url) => new URL(url).host;
 const indent = (text) => text.trim().split('\n').map((l) => `      ${l}`).join('\n');
 
+/**
+ * Every origin whose indexing state is snapshotted. Deliberately broader than the
+ * assertion set: FOX2-156 names `https://foxbox.com/robots.txt` specifically, and
+ * the apex is a distinct origin from www even while it 308s across. Once FOX2-155
+ * makes the apex primary, this is the origin that matters most.
+ */
+const SNAPSHOT_ORIGINS = [
+  { key: 'foxbox-www', origin: 'https://www.foxbox.com', canonicalOf: '/' },
+  { key: 'foxbox-apex', origin: 'https://foxbox.com', canonicalOf: '/' },
+  { key: 'stormwind', origin: 'https://stormwindstudios.com', canonicalOf: '/' },
+  { key: 'signallabs', origin: 'https://www.signallabs.ai', canonicalOf: '/' },
+  { key: 'foxbox-staging', origin: 'https://staging.foxbox.com', canonicalOf: null },
+];
+
+/**
+ * Emits the current indexing-control state as stable JSON, for commit-and-diff.
+ *
+ * Determinism matters more than completeness here: anything that varies per request
+ * (timestamps, request IDs, ETags) would produce a diff every hour and train
+ * everyone to ignore the alert. Only fields that change when someone changes
+ * something are recorded. No timestamp is included for exactly this reason — git
+ * already records when the snapshot moved.
+ */
+async function buildSnapshot() {
+  const snapshot = {};
+
+  for (const { key, origin, canonicalOf } of SNAPSHOT_ORIGINS) {
+    const entry = { origin };
+
+    try {
+      const res = await req(`${origin}/robots.txt`, { redirect: 'manual' });
+      entry.robotsStatus = res.status;
+      if (res.status >= 300 && res.status < 400) {
+        // Record the hop rather than its destination: a redirect appearing or
+        // disappearing on /robots.txt is itself a change worth seeing.
+        entry.robotsRedirectsTo = res.headers.get('location') ?? null;
+        const followed = await req(`${origin}/robots.txt`);
+        entry.robotsBody = normaliseBody(await followed.text());
+      } else {
+        entry.robotsBody = normaliseBody(await res.text());
+      }
+    } catch (err) {
+      entry.robotsError = err.message;
+    }
+
+    try {
+      const res = await req(`${origin}/`, { redirect: 'manual' });
+      entry.rootStatus = res.status;
+      entry.xRobotsTag = res.headers.get('x-robots-tag') ?? null;
+      const location = res.headers.get('location');
+      if (location) entry.rootRedirectsTo = location;
+    } catch (err) {
+      entry.rootError = err.message;
+    }
+
+    if (canonicalOf) {
+      try {
+        const res = await req(`${origin}${canonicalOf}`);
+        const tag = (await res.text()).match(CANONICAL_TAG);
+        entry.canonical = tag ? (tag[0].match(HREF_ATTR)?.[1] ?? null) : null;
+      } catch (err) {
+        entry.canonicalError = err.message;
+      }
+    }
+
+    snapshot[key] = entry;
+  }
+
+  return snapshot;
+}
+
+// CRLF and trailing whitespace vary between edge nodes and would diff spuriously.
+const normaliseBody = (text) => text.replace(/\r\n/g, '\n').trim();
+
 async function main() {
   const args = process.argv.slice(2);
   const asJson = args.includes('--json');
   const keys = args.filter((a) => !a.startsWith('--'));
+
+  if (args.includes('--snapshot')) {
+    // Trailing newline so the committed file is POSIX-clean and diffs read well.
+    process.stdout.write(JSON.stringify(await buildSnapshot(), null, 2) + '\n');
+    process.exit(0);
+  }
 
   const publicSites = keys.length ? SITES.filter((s) => keys.includes(s.key)) : SITES;
   const blockedHosts = keys.length ? BLOCKED_HOSTS.filter((h) => keys.includes(h.key)) : BLOCKED_HOSTS;
@@ -336,6 +435,27 @@ async function main() {
   }
   for (const host of blockedHosts) {
     results.push({ label: host.label, kind: 'blocked', checks: await checkBlockedHost(host) });
+  }
+
+  // FOX2-156 acceptance criterion: "Confirm the alert fires by deliberately
+  // triggering it once." A test message proves delivery but not that a real failure
+  // reaches the channel, so this exercises the genuine gating path end to end.
+  if (args.includes('--force-failure')) {
+    results.push({
+      label: 'SYNTHETIC (--force-failure)',
+      kind: 'public',
+      checks: [
+        {
+          name: 'deliberate failure to exercise the alert path',
+          ok: false,
+          tier: 'gate',
+          detail:
+            'This is a drill, not an incident. Triggered by --force-failure to satisfy ' +
+            'FOX2-156 ("confirm the alert fires by deliberately triggering it once"). ' +
+            'Production was NOT asserted to be broken by this check.',
+        },
+      ],
+    });
   }
 
   const bad = results.flatMap((r) => r.checks.filter((c) => !c.ok).map((c) => ({ ...c, label: r.label })));

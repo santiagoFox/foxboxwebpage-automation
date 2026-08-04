@@ -1,59 +1,76 @@
 name: indexing-monitor
 
-# External guard for FOX2-154 (production served `Disallow: /` for ~5.5 weeks,
-# 2026-06-19 to 2026-07-28, and nothing noticed).
+# FOX2-156 — detect indexing-control changes between deployments, from outside the
+# deploy pipeline.
+#
+# Background: PR #184 made production serve `Disallow: /` from 2026-06-19 to
+# 2026-07-28. foxbox.com was fully deindexed for ~5.5 weeks. The first signal was a
+# Google Search Console email that took about a month to arrive.
 #
 # Deliberately SEPARATE from nightly.yml. The nightly runs 86 Playwright tests and
-# posts one pass/fail line to Slack, so a deindexing event would look identical to
-# a flaky locator. This workflow does one thing, runs hourly instead of daily, and
-# alerts with the failing assertion in the message.
+# posts one pass/fail line, so a deindexing event would look identical to a flaky
+# locator. This runs hourly, does one thing, and says what changed.
 #
-# It is external to the *Vercel deploy pipeline* — it black-box curls production on
-# a schedule and would have caught PR #184 within the hour. It is NOT external to
-# this repo: the same PR flow that shipped the bug could disable this file. That is
-# accepted risk, recorded in the FOX2-154 postmortem; migrating to an off-repo
-# monitor is the follow-up.
+# Two mechanisms, two noise levels:
+#   - ASSERTIONS gate. A known-catastrophic state pages the on-call team.
+#   - SNAPSHOT DIFF reports. Any change to robots.txt or X-Robots-Tag posts
+#     before/after values without paging, and the committed snapshot doubles as the
+#     audit trail nobody had in June.
 #
-# SETUP REQUIRED: the `SLACK_WEBHOOK_URL_INDEXING` secret must point at the alert
-# channel. It is intentionally a different secret from the nightly's
-# SLACK_WEBHOOK_URL so this alert can go somewhere people actually read.
+# SETUP:
+#   secret SLACK_WEBHOOK_URL_INDEXING  (required) — alert channel webhook
+#   var    ALERT_MENTION               (optional) — Slack handle to page on gating
+#                                       failures. Defaults to <!here>. Prefer a team
+#                                       group handle, e.g. <!subteam^S0123|web-oncall>,
+#                                       per FOX2-156 "route to an accountable team
+#                                       rather than an individual".
+#
+# NOTE: `schedule` only fires on the default branch, so this does nothing until
+# merged to main. `workflow_dispatch` also requires the file on main to be runnable.
 
 on:
   schedule:
-    - cron: '17 * * * *'   # hourly at :17 — off the top of the hour, which is the
-                           # busiest slot on GH Actions' shared scheduler
+    - cron: '17 * * * *'   # hourly at :17 — off the top of the hour, the busiest
+                           # slot on GH Actions' shared scheduler
   workflow_dispatch:
     inputs:
       test_alert:
-        description: 'Send a test message to Slack to prove the alert path works'
+        description: 'Send a harmless test message to Slack (proves delivery only)'
+        type: boolean
+        default: false
+      force_failure:
+        description: 'Fire a REAL gating alert as a drill (pages the channel)'
         type: boolean
         default: false
 
-# Never let a slow run pile up on top of the next scheduled one.
 concurrency:
   group: indexing-monitor
   cancel-in-progress: false
+
+permissions:
+  contents: write   # commits the snapshot so the diff has a durable before/after
 
 jobs:
   check:
     name: robots.txt + X-Robots-Tag
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # This workflow only posts to Slack on failure, which means a healthy run and a
-      # broken webhook look identical: silence. A wrong secret, a revoked app or a
-      # typo'd channel would only surface at the exact moment it mattered — the same
-      # silent-failure-behind-a-green-surface shape as the FOX2-154 incident itself.
-      #
-      # Run this workflow manually with `test_alert` checked to prove the path
-      # end-to-end. Re-run it whenever the secret or channel changes.
-      #
-      # No `<!here>` here on purpose: pinging the channel for tests is how people
-      # learn to ignore the ping. This verifies delivery, not the mention.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # No `npm ci` and no browser install on purpose: the script is dependency-free
+      # so this check keeps working when the repo's tooling doesn't.
+
+      # Proves the webhook, secret and channel are wired up. Without this, a healthy
+      # run and a broken webhook are indistinguishable — both are silence — and we
+      # would discover the alert path never worked at the moment we needed it.
+      # No mention on purpose: pinging for tests is how people learn to ignore pings.
       - name: Send test alert
         if: github.event_name == 'workflow_dispatch' && inputs.test_alert
         env:
@@ -61,116 +78,163 @@ jobs:
           ACTOR: ${{ github.actor }}
         run: |
           if [ -z "$WEBHOOK" ]; then
-            echo "::error::SLACK_WEBHOOK_URL_INDEXING is not set — this is exactly what the test is for."
+            echo "::error::SLACK_WEBHOOK_URL_INDEXING is not set — which is what this test is for."
             exit 1
           fi
-
           jq -n --arg actor "$ACTOR" '{
             text: "Indexing monitor: test alert",
-            blocks: [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: (":white_check_mark: *Indexing monitor test alert*\nThe webhook works and this is the channel real alerts land in. Triggered manually by `" + $actor + "` — nothing is wrong.\n\nA real alert looks different: red header, the failing assertion inline, and it pings `@here`.")
-                }
-              }
-            ]
+            blocks: [{ type: "section", text: { type: "mrkdwn", text:
+              (":white_check_mark: *Indexing monitor test alert*\nDelivery works and this is the channel real alerts land in. Triggered by `" + $actor + "` — nothing is wrong.\n\nA real alert has a red header, the failing assertion inline, and pings the on-call handle.") } }]
           }' > test-payload.json
+          curl -sS --fail-with-body -X POST -H 'Content-Type: application/json' \
+            --data @test-payload.json "$WEBHOOK"
+          echo "Delivered. Confirm it arrived in the expected channel."
 
-          curl -sS --fail-with-body -X POST \
-            -H 'Content-Type: application/json' \
-            --data @test-payload.json \
-            "$WEBHOOK"
-
-          echo "Test alert delivered. Confirm it arrived in the expected channel."
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      # No `npm ci` and no browser install on purpose: the script is
-      # dependency-free so this check keeps working when the repo's tooling breaks.
-
-      - name: Check production indexability
+      - name: Assert production indexability
         id: check
         run: |
           set +e
-          node scripts/check-indexing.mjs 2>&1 | tee monitor-output.txt
+          FORCE=''
+          if [ "${{ inputs.force_failure }}" = "true" ]; then
+            FORCE='--force-failure'
+            echo "::warning::Running with --force-failure: this is a drill and will page the channel."
+          fi
+          node scripts/check-indexing.mjs $FORCE 2>&1 | tee monitor-output.txt
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
-      # Warnings are non-gating by design (see CANONICAL_TIER in the script), so they
-      # must not page the channel — but they should not be invisible either. They land
-      # in the run summary and the uploaded artifact.
-      - name: Surface warnings in the run summary
+      # The FOX2-156 requirement proper: alert when robots.txt or the X-Robots-Tag
+      # header CHANGES, with before and after values. Assertions cannot do this —
+      # they only know the states we thought to anticipate.
+      - name: Snapshot indexing state and diff against last known
+        id: snap
+        run: |
+          mkdir -p snapshots
+          SNAP=snapshots/indexing-state.json
+
+          if [ ! -f "$SNAP" ]; then
+            node scripts/check-indexing.mjs --snapshot > "$SNAP"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "baseline=true" >> "$GITHUB_OUTPUT"
+            echo "No previous snapshot — establishing baseline, not alerting."
+            exit 0
+          fi
+
+          node scripts/check-indexing.mjs --snapshot > "$SNAP.new"
+          if diff -q "$SNAP" "$SNAP.new" >/dev/null; then
+            rm "$SNAP.new"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No change since last run."
+          else
+            # Captured before the file is overwritten, so before/after are both real.
+            diff -u "$SNAP" "$SNAP.new" | tail -n +3 > snapshot-diff.txt || true
+            mv "$SNAP.new" "$SNAP"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Indexing state CHANGED:"
+            cat snapshot-diff.txt
+          fi
+          echo "baseline=false" >> "$GITHUB_OUTPUT"
+
+      - name: Surface results in the run summary
         if: always()
         run: |
           {
             echo '## Indexing monitor'
             echo '```'
-            cat monitor-output.txt
+            cat monitor-output.txt 2>/dev/null || echo '(assertions did not run)'
             echo '```'
+            if [ -f snapshot-diff.txt ]; then
+              echo '## Indexing state changed'
+              echo '```diff'
+              cat snapshot-diff.txt
+              echo '```'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-          if grep -q '^  WARN' monitor-output.txt; then
+          if grep -q '^  WARN' monitor-output.txt 2>/dev/null; then
             echo "::warning::Non-gating indexing warnings present — see the run summary (FOX2-155)."
           fi
 
-      - name: Notify Slack on failure
+      # Change notice. Reports, does not page: a scoped `Disallow: /new-path` is a
+      # legitimate edit, and paging on legitimate edits is how a monitor gets muted.
+      - name: Notify Slack on change
+        if: steps.snap.outputs.changed == 'true'
+        env:
+          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_INDEXING }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "::error::SLACK_WEBHOOK_URL_INDEXING is not set — state changed but nobody was told."
+            exit 1
+          fi
+          jq -n \
+            --rawfile diff snapshot-diff.txt \
+            --arg run_url "$RUN_URL" \
+            '{
+              text: "Indexing state changed on production",
+              blocks: [
+                { type: "header", text: { type: "plain_text", text: "Indexing state changed" } },
+                { type: "section", text: { type: "mrkdwn", text:
+                  "robots.txt or the `X-Robots-Tag` header changed since the last check. Before and after below (`-` was, `+` is now). No assertion failed, so this is informational — but if nobody intended this change, treat it as an incident." } },
+                { type: "section", text: { type: "mrkdwn", text: ("```" + ($diff | .[0:2600]) + "```") } },
+                { type: "section", text: { type: "mrkdwn", text: ("Runbook: `docs/runbooks/indexing-alert.md` • <" + $run_url + "|View run>") } }
+              ]
+            }' > change-payload.json
+          curl -sS --fail-with-body -X POST -H 'Content-Type: application/json' \
+            --data @change-payload.json "$WEBHOOK"
+
+      - name: Notify Slack on gating failure
         if: steps.check.outputs.exit_code != '0'
         env:
           WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_INDEXING }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          MENTION: ${{ vars.ALERT_MENTION || '<!here>' }}
         run: |
           if [ -z "$WEBHOOK" ]; then
             echo "::error::SLACK_WEBHOOK_URL_INDEXING is not set — checks failed but nobody was alerted."
             exit 1
           fi
 
-          # Built with jq --rawfile rather than a heredoc: the script output contains
-          # quotes, slashes and newlines that would produce invalid JSON if templated.
+          # jq --rawfile rather than a heredoc: the output contains quotes, slashes and
+          # newlines that would produce invalid JSON if templated.
           jq -n \
             --rawfile output monitor-output.txt \
             --arg run_url "$RUN_URL" \
+            --arg mention "$MENTION" \
             '{
               text: "🚨 INDEXING ALERT: production may be deindexed",
               blocks: [
-                {
-                  type: "header",
-                  text: { type: "plain_text", text: "🚨 Indexing check FAILED" }
-                },
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    # <!here> is Slack mention syntax and only fires on gating failures —
-                    # never on warnings, and never on the test alert. Volume is near zero
-                    # by design (silent on success), so a ping here is justified: every
-                    # message this step sends means production may be dropping out of
-                    # Google, and the last one went unnoticed for 5.5 weeks.
-                    text: "<!here> A production indexability assertion is failing. This is the FOX2-154 failure mode: the site stays up and looks fine while dropping out of Google.\n\n*Check `robots.txt` and the `X-Robots-Tag` header before anything else.*"
-                  }
-                },
-                {
-                  type: "section",
-                  text: { type: "mrkdwn", text: ("```" + ($output | .[0:2600]) + "```") }
-                },
-                {
-                  type: "section",
-                  text: { type: "mrkdwn", text: ("<" + $run_url + "|View full run>") }
-                }
+                { type: "header", text: { type: "plain_text", text: "🚨 Indexing check FAILED" } },
+                { type: "section", text: { type: "mrkdwn", text:
+                  ($mention + " A production indexability assertion is failing. This is the FOX2-154 failure mode: the site stays up and looks fine while dropping out of Google.\n\n*Check `robots.txt` and the `X-Robots-Tag` header before anything else.*") } },
+                { type: "section", text: { type: "mrkdwn", text: ("```" + ($output | .[0:2400]) + "```") } },
+                { type: "section", text: { type: "mrkdwn", text: ("Runbook: `docs/runbooks/indexing-alert.md` • <" + $run_url + "|View full run>") } }
               ]
             }' > payload.json
 
-          curl -sS --fail-with-body -X POST \
-            -H 'Content-Type: application/json' \
-            --data @payload.json \
-            "$WEBHOOK"
+          curl -sS --fail-with-body -X POST -H 'Content-Type: application/json' \
+            --data @payload.json "$WEBHOOK"
 
-      - name: Fail the job if any check failed
+      # Committed even when the assertions failed, so the next run compares against
+      # reality and does not re-alert the same change every hour. Commits made with
+      # GITHUB_TOKEN do not retrigger workflows, so this cannot loop.
+      - name: Commit the snapshot
+        if: steps.snap.outputs.changed == 'true' || steps.snap.outputs.baseline == 'true'
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add snapshots/indexing-state.json
+          git diff --staged --quiet && { echo "Nothing to commit."; exit 0; }
+          if [ "${{ steps.snap.outputs.baseline }}" = "true" ]; then
+            git commit -q -m 'chore(monitor): establish indexing-state baseline [skip ci]'
+          else
+            git commit -q -m 'chore(monitor): record indexing-state change [skip ci]'
+          fi
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Fail the job if a gating check failed
         if: steps.check.outputs.exit_code != '0'
         run: |
-          echo "::error::Indexing checks failed — see the Slack alert and the log above."
+          echo "::error::Gating indexing checks failed — see the Slack alert and the log above."
           exit 1
 
       - name: Upload monitor output
@@ -178,5 +242,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: indexing-monitor-${{ github.run_number }}
-          path: monitor-output.txt
+          path: |
+            monitor-output.txt
+            snapshot-diff.txt
+          if-no-files-found: warn
           retention-days: 30

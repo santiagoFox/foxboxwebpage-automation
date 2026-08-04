@@ -196,11 +196,37 @@ expected until confirmed.
 4. Posts pass/fail Slack notification via incoming webhook
 
 **`.github/workflows/indexing-monitor.yml`** — runs **hourly** (`:17`) and on manual dispatch.
-Runs `scripts/check-indexing.mjs`, alerts Slack with the failing assertion, then fails the job.
+Implements **FOX2-156**. Runs `scripts/check-indexing.mjs`, alerts Slack, fails the job.
+
+**Two independent mechanisms** — they catch different things, neither replaces the other:
+
+1. **Assertions** (default mode) — "is production in a known-good state?" Gating failures
+   page the on-call handle. Narrow, near-zero false positives.
+2. **Snapshot + diff** (`--snapshot`) — "did anything change?" Reports before/after for any
+   change to robots.txt or `X-Robots-Tag`, including changes no assertion anticipates.
+   Non-paging: a scoped `Disallow: /new-path` is a legitimate edit. The workflow commits
+   `snapshots/indexing-state.json`, so its git history is the audit trail June lacked.
+
+Snapshot output is deliberately **deterministic** — no timestamps, CRLF normalised. Anything
+varying per request would diff hourly and train everyone to ignore the alert.
+
+**Manual dispatch inputs**: `test_alert` sends a harmless test message (proves webhook
+delivery only, no ping); `force_failure` fires a **real** gating alert as a drill, which is
+how FOX2-156's "confirm the alert fires by deliberately triggering it once" is satisfied.
+
+**Runbook**: `docs/runbooks/indexing-alert.md`, linked from every alert. Required by
+FOX2-156's acceptance criteria.
 
 Separate from the nightly on purpose: the nightly's single pass/fail Slack line makes a
-deindexing event indistinguishable from a flaky locator. Requires the
-**`SLACK_WEBHOOK_URL_INDEXING`** secret (distinct from `SLACK_WEBHOOK_URL`).
+deindexing event indistinguishable from a flaky locator.
+
+**Config**: secret **`SLACK_WEBHOOK_URL_INDEXING`** (required, distinct from
+`SLACK_WEBHOOK_URL`; points at `#foxbox-webpage-nightly`). Repo var **`ALERT_MENTION`**
+(optional) sets who gets paged on gating failures — defaults to `<!here>`, but FOX2-156 asks
+for an accountable team, so prefer a group handle like `<!subteam^S0123|web-oncall>`.
+
+**`schedule` only fires on the default branch**, so this does nothing until merged to
+`main` — and `workflow_dispatch` isn't runnable until the file is on `main` either.
 
 `scripts/check-indexing.mjs` is **dependency-free and browser-free** — no `npm ci`, no
 Playwright install, just `fetch`. Keep it that way; its value is that it survives breakage
