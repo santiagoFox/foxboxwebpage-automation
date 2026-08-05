@@ -15,9 +15,15 @@ class HomePage extends BasePage {
     this.navLetsChatButton = page.getByRole('link', { name: /LET'S CHAT/i });
 
     // COMPANY links
-    this.navAboutUs = page.getByRole('link', { name: 'About Us' });
-    this.navOurWork = page.getByRole('link', { name: 'Our Work' });
-    this.navInsideTheBox = page.getByRole('link', { name: 'Inside the Box' });
+    // Scoped to <nav>: the footer was relabelled to use these same three names
+    // ("About" -> "About Us", plus "Our Work" and "Inside the Box"), so an
+    // unscoped getByRole now matches the nav link AND the footer link and fails
+    // on strict mode. There is exactly one <nav> and one <footer>, which makes
+    // both semantic scopes unambiguous — preferred over `.first()`, since that
+    // silently depends on DOM order.
+    this.navAboutUs = page.locator('nav').getByRole('link', { name: 'About Us' });
+    this.navOurWork = page.locator('nav').getByRole('link', { name: 'Our Work' });
+    this.navInsideTheBox = page.locator('nav').getByRole('link', { name: 'Inside the Box' });
     // SOLUTIONS links
     this.navProductLab = page.getByRole('link', { name: 'Product Lab' }).first();
     this.navProductMaintenance = page.getByRole('link', { name: 'Product Maintenance' }).first();
@@ -100,7 +106,11 @@ class HomePage extends BasePage {
     this.staffAugLearnMore = this.staffAugContent.locator('a');
 
     // Inside the Box (blog)
-    this.insideTheBoxHeading = page.getByText('Inside the Box');
+    // Matched by heading role, not raw text: the footer's relabelled link is also
+    // the literal string "Inside the Box", so getByText resolved to 2 elements.
+    // The homepage one is the section's <h2>, so the role is what distinguishes
+    // them — and it is what these tests actually mean by "heading".
+    this.insideTheBoxHeading = page.getByRole('heading', { name: 'Inside the Box' });
     this.blogArticles = page.getByRole('link', { name: /READ MORE/i });
     this.firstArticleTitle = page.locator('aside a[aria-label^="Read more about"]').nth(0);
     this.secondArticleTitle = page.locator('aside a[aria-label^="Read more about"]').nth(1);
@@ -132,8 +142,12 @@ class HomePage extends BasePage {
     this.footerContactUs = page.locator('footer').getByRole('link', { name: 'Contact us' });
     this.footerFollowUs = page.locator('footer').getByText('Follow Us');
     this.footerLinkedIn = page.locator('footer').getByRole('link', { name: /linkedin/i });
+    // The footer link is labelled "About Us" now; 'About' still resolves it as a
+    // substring match, so this is left as-is deliberately rather than churned.
     this.footerAbout = page.locator('footer').getByRole('link', { name: 'About' });
-    this.footerBlog = page.locator('footer').getByRole('link', { name: 'Blog' });
+    // Relabelled "Blog" -> "Inside the Box" in the footer. The href is unchanged,
+    // so SC16-TC02/SC20-TC03 assert the same thing; only the name had to move.
+    this.footerBlog = page.locator('footer').getByRole('link', { name: 'Inside the Box' });
     this.footerApproach = page.locator('footer').getByRole('link', { name: 'Approach' });
     this.footerCulture = page.locator('footer').getByRole('link', { name: 'Culture' });
     this.footerProductLab = page.locator('footer').getByRole('link', { name: 'Product Lab' });
