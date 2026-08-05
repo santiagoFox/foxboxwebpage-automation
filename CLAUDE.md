@@ -40,6 +40,7 @@ tests/
   pages/       ← page object classes (base.page.js + one per page)
   fixtures/    ← fixtures.js (extends test with page fixtures)
 data/          ← testData.js (expected strings/values for assertions)
+scripts/       ← check-indexing.mjs (standalone, no deps — see CI/CD)
 playwright.config.js
 ```
 
@@ -153,17 +154,30 @@ Avoid XPath. Scope ambiguous locators with `page.locator('footer')` or use `.fir
 
 | Menu Link | URL pattern |
 |---|---|
-| About Us | `/about` |
+| About Us | `/about` → **307** → `/about/us` (see 307 note below) |
 | Our Work | `/case-studies` (FOX2-129 — migrated from `/tags/case-studies`) |
 | Inside the Box | `/blog` |
 | Careers | `jobs.gem.com/foxbox-digital` (external) |
-| Product Lab | `/product-lab` |
-| Product Maintenance | `/product-maintenance` |
-| Staff Aug+ | `/staff-aug` |
-| Healthcare | `/healthcare` |
+| Product Lab | `/services/product-lab` |
+| Product Maintenance | `/services/product-maintenance` |
+| Staff Aug+ | `/services/staff-augmentation` |
+| Healthcare | `/services/healthcare` |
+| Services index | `/services` |
+| AI Native Assessment | `/ai-native-assessment` |
 | K Health: AI Healthcare | `/case-studies/*k-health*` (FOX2-94 — was `/blog/*`) |
 | Versapay | `/case-studies/*versapay*` (FOX2-94 — was `/blog/*`) |
 | Anthem | `/case-studies/*anthem*` (FOX2-94 — was `/blog/*`) |
+
+**`/services/*` migration (verified 2026-07-31)**: the four solution pages moved under
+`/services/` and Staff Aug+ was also renamed (`/staff-aug` → `/services/staff-augmentation`).
+Page objects were already updated; this table, the SC21 seed list, and the SC14-TC04 URL
+assertion were not. The **old URLs are hard 404s, not redirects** — no `/product-lab`,
+`/product-maintenance`, `/staff-aug`, or `/healthcare` redirect exists. Likely FOX2-71 scope.
+
+**307 on `/about`**: `/about` serves an HTTP **307 (temporary)** redirect to `/about/us`.
+FOX2-60 ("change temporary 302 → permanent 301") is marked Done, so this route either
+missed the fix or is generated at the framework level. Unresolved — do not codify 307 as
+expected until confirmed.
 
 ---
 
@@ -180,6 +194,76 @@ Avoid XPath. Scope ambiguous locators with `page.locator('footer')` or use `.fir
 2. Runs `npm test`
 3. Uploads HTML report as a 30-day artifact; uploads `test-results/` on failure (7 days)
 4. Posts pass/fail Slack notification via incoming webhook
+
+**`.github/workflows/indexing-monitor.yml`** — runs **hourly** (`:17`) and on manual dispatch.
+Implements **FOX2-156**. Runs `scripts/check-indexing.mjs`, alerts Slack, fails the job.
+
+**Two independent mechanisms** — they catch different things, neither replaces the other:
+
+1. **Assertions** (default mode) — "is production in a known-good state?" Gating failures
+   page the on-call handle. Narrow, near-zero false positives.
+2. **Snapshot + diff** (`--snapshot`) — "did anything change?" Reports before/after for any
+   change to robots.txt or `X-Robots-Tag`, including changes no assertion anticipates.
+   Non-paging: a scoped `Disallow: /new-path` is a legitimate edit. The workflow commits
+   `snapshots/indexing-state.json`, so its git history is the audit trail June lacked.
+
+Snapshot output is deliberately **deterministic** — no timestamps, CRLF normalised. Anything
+varying per request would diff hourly and train everyone to ignore the alert.
+
+**Manual dispatch inputs**: `test_alert` sends a harmless test message (proves webhook
+delivery only, no ping); `force_failure` fires a **real** gating alert as a drill, which is
+how FOX2-156's "confirm the alert fires by deliberately triggering it once" is satisfied.
+
+**Runbook**: `docs/runbooks/indexing-alert.md`, linked from every alert. Required by
+FOX2-156's acceptance criteria.
+
+Separate from the nightly on purpose: the nightly's single pass/fail Slack line makes a
+deindexing event indistinguishable from a flaky locator.
+
+**Config**: secret **`SLACK_WEBHOOK_URL_INDEXING`** (required, distinct from
+`SLACK_WEBHOOK_URL`; points at `#foxbox-webpage-nightly`). Repo var **`ALERT_MENTION`**
+(optional) sets who gets paged on gating failures — defaults to `<!here>`, but FOX2-156 asks
+for an accountable team, so prefer a group handle like `<!subteam^S0123|web-oncall>`.
+
+**`schedule` only fires on the default branch**, so this does nothing until merged to
+`main` — and `workflow_dispatch` isn't runnable until the file is on `main` either.
+
+`scripts/check-indexing.mjs` is **dependency-free and browser-free** — no `npm ci`, no
+Playwright install, just `fetch`. Keep it that way; its value is that it survives breakage
+in the rest of the repo's tooling. Run it locally with `npm run monitor` (or
+`node scripts/check-indexing.mjs foxbox --json`).
+
+It asserts expected state rather than diffing, and covers all three production sites plus
+the inverted staging check. Canonical hosts differ per site and are declared individually:
+
+| Site | Canonical host | Non-canonical |
+|---|---|---|
+| foxbox.com | `www.foxbox.com` | apex 308 → www |
+| stormwindstudios.com | `stormwindstudios.com` (apex) | www 301 → apex |
+| signallabs.ai | `www.signallabs.ai` | not asserted |
+
+**Two failure tiers.** `gate` fails the job and pages Slack — reserved for the deindexing
+class (blanket `Disallow: /`, `noindex` header). `warn` is reported in the run summary and
+artifact but pages nobody. Warnings do not affect the exit code.
+
+The tiers exist because of **FOX2-155**: the canonical checks fail on production today, so
+shipping them as gating would make the monitor red on its first run, and a monitor that is
+red on arrival gets muted. Promote `CANONICAL_TIER` to `'gate'` once FOX2-155 lands.
+
+**FOX2-155 root cause (confirmed 2026-07-31 via Ahrefs Site Audit, 261/261 rows)**: every
+`www.foxbox.com` page returns 200 with `rel=canonical` pointing at the **apex** host and the
+same path; the apex then 308s back to www. Canonical-points-to-redirect ⇒ Google treats all
+261 pages as non-indexable. The apex→www 308 is correct; the **canonical tag** is wrong.
+Almost certainly one shared base-URL constant set to `foxbox.com` — the same apex host also
+appears in robots.txt's `Sitemap:` directive. Not a Vercel redirect misconfiguration.
+
+Canonical checks are **sampled, not exhaustive** (root + 2 templates for foxbox). The defect
+is generated from one constant, so it is uniform site-wide and sampling detects it as
+reliably as crawling every page. Ahrefs stays the tool for full-site coverage.
+
+**Relationship to SC43**: the Playwright spec and the monitor overlap deliberately. SC43
+fails a test run; the monitor pages a channel hourly and keeps working if the suite breaks.
+Neither can pre-verify that a fix reached a branch — see the header of `robots.spec.js`.
 
 ---
 

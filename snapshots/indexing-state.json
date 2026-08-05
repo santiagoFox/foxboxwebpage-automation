@@ -1,0 +1,43 @@
+{
+  "foxbox-www": {
+    "origin": "https://www.foxbox.com",
+    "robotsStatus": 200,
+    "robotsBody": "User-agent: *\nAllow: /\n\nSitemap: https://foxbox.com/sitemap.xml",
+    "rootStatus": 200,
+    "xRobotsTag": null,
+    "canonical": "https://foxbox.com"
+  },
+  "foxbox-apex": {
+    "origin": "https://foxbox.com",
+    "robotsStatus": 308,
+    "robotsRedirectsTo": "https://www.foxbox.com/robots.txt",
+    "robotsBody": "User-agent: *\nAllow: /\n\nSitemap: https://foxbox.com/sitemap.xml",
+    "rootStatus": 308,
+    "xRobotsTag": null,
+    "rootRedirectsTo": "https://www.foxbox.com/",
+    "canonical": "https://foxbox.com"
+  },
+  "stormwind": {
+    "origin": "https://stormwindstudios.com",
+    "robotsStatus": 200,
+    "robotsBody": "User-Agent: *\nAllow: /\nDisallow: /api/\nDisallow: /503\nDisallow: /sentry-test\nDisallow: /_next/\nDisallow: /monitoring\n\nSitemap: https://stormwindstudios.com/sitemap.xml",
+    "rootStatus": 200,
+    "xRobotsTag": null,
+    "canonical": "https://stormwindstudios.com"
+  },
+  "signallabs": {
+    "origin": "https://www.signallabs.ai",
+    "robotsStatus": 200,
+    "robotsBody": "User-Agent: *\nAllow: /\nDisallow: /studio/\nDisallow: /api/\n\nSitemap: https://signallabs.ai/sitemap.xml",
+    "rootStatus": 200,
+    "xRobotsTag": null,
+    "canonical": "https://www.signallabs.ai"
+  },
+  "foxbox-staging": {
+    "origin": "https://staging.foxbox.com",
+    "robotsStatus": 200,
+    "robotsBody": "User-agent: *\nDisallow: /",
+    "rootStatus": 200,
+    "xRobotsTag": "noindex"
+  }
+}

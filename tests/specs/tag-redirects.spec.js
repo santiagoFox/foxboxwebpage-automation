@@ -21,6 +21,23 @@ const RETIRED_TAGS_TO_BLOG = [
   'uxdesign',
 ];
 
+// Tags the ticket explicitly says to KEEP (they still have posts after the
+// FOX2-7 case-study migration). Previously only /tags/engineering was checked —
+// a tag that isn't on the ticket's keep list at all — so a regression that
+// removed a documented keep-tag would not have been caught.
+const KEPT_TAGS = [
+  'mobile-app-development', // 3 clicks — highest of any tag per the GSC export
+  'react-native',
+  'innovation',
+  'the-foxbox-way',
+  'healthcare',
+  'product',
+  'agile',
+  'b2b-app-development',
+  'cross-platform-apps',
+  'mvp',
+];
+
 const pad = (n) => String(n).padStart(2, '0');
 
 test.describe('SC38 - Stale blog tag page redirects (FOX2-102)', () => {
@@ -40,5 +57,15 @@ test.describe('SC38 - Stale blog tag page redirects (FOX2-102)', () => {
 
   test('SC38-TC14 - Active tag page /tags/engineering still returns 200', async ({ page }) => {
     await assertPageLive(page, '/tags/engineering');
+  });
+
+  // Every tag on FOX2-102's "Keep (review after migration)" list must stay live.
+  // The ticket's own caveat applies: "keep only tags that still have posts after
+  // the migration" — so if one of these is intentionally emptied later, remove it
+  // from KEPT_TAGS rather than loosening the assertion.
+  KEPT_TAGS.forEach((tag, i) => {
+    test(`SC38-TC${pad(i + 15)} - Kept tag page /tags/${tag} stays live`, async ({ page }) => {
+      await assertPageLive(page, `/tags/${tag}`);
+    });
   });
 });

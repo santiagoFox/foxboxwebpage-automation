@@ -80,7 +80,11 @@ test.describe('SC14 - Navigation Menu - SOLUTIONS Links', () => {
     await homePage.openNavMenu();
     await homePage.navHealthcare.click();
     await homePage.page.waitForLoadState('load');
-    await expect(homePage.page).toHaveURL(/\/healthcare/);
+    // Anchored to /services/healthcare: the old /\/healthcare/ pattern also
+    // matched the migrated URL, so this assertion passed straight through the
+    // /services/* route migration without noticing it. Bare /healthcare is now
+    // a hard 404.
+    await expect(homePage.page).toHaveURL(/\/services\/healthcare$/);
   });
 });
 
