@@ -4,11 +4,12 @@ class CaseStudiesPage extends BasePage {
   constructor(page) {
     super(page);
 
-    // Page heading. The old Drupal tag page (/tags/case-studies) was migrated to
-    // /case-studies; the heading is now this tagline (was "case studies"), and the
-    // "N posts tagged with" count + "Browse all tags" link were removed.
+    // Page heading — the h1 on /case-studies. Reverted to the plain "Case Studies"
+    // title (observed live 2026-08-06); it had briefly been the tagline "What we've
+    // built and how we've built it" after the /tags/case-studies → /case-studies
+    // migration. Pinned to level 1 so it can never match a case-study card <h3>.
     this.pageHeading = page
-      .getByRole('heading', { name: /what we.ve built and how we.ve built it/i })
+      .getByRole('heading', { name: /^case studies$/i, level: 1 })
       .first();
 
     // Cards shown on the prod /case-studies index. Anthem and Home Chef have live
