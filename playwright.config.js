@@ -12,7 +12,11 @@ module.exports = defineConfig({
     ['html', { outputFolder: 'reports/html', open: 'never' }],
   ],
   use: {
-    baseURL: 'https://www.foxbox.com',
+    // Canonical host is the apex (FOX2-155, landed 2026-08-05); www 308s to it.
+    // The suite must originate from the apex so relative navigations and redirect
+    // assertions capture the real hop (e.g. /blog -> /case-studies) instead of the
+    // www->apex canonicalisation hop that fires first when requesting via www.
+    baseURL: 'https://foxbox.com',
     headless: true,
     viewport: { width: 1440, height: 900 },
     screenshot: 'only-on-failure',

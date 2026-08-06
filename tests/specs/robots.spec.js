@@ -73,7 +73,7 @@ test.describe('SC43 - robots.txt indexability (FOX2-154)', () => {
     expect(
       offending,
       `\n\nFOX2-154 REGRESSION: production robots.txt is blocking the entire site.\n` +
-        `This de-indexes www.foxbox.com. Check that VERCEL_ENV resolves to 'production'.\n` +
+        `This de-indexes foxbox.com. Check that VERCEL_ENV resolves to 'production'.\n` +
         `${offending.join('\n')}\n\nFull robots.txt:\n${body}\n`
     ).toHaveLength(0);
   });
@@ -97,9 +97,9 @@ test.describe('SC43 - robots.txt indexability (FOX2-154)', () => {
     expect(match, 'no Sitemap directive to follow').toBeTruthy();
 
     const sitemapUrl = match[1];
-    // Follow redirects: robots.txt currently declares the apex host
-    // (https://foxbox.com/sitemap.xml), which 308s to the www host. That hop is
-    // acceptable — we only care that the URL ultimately serves a sitemap.
+    // robots.txt declares the apex host (https://foxbox.com/sitemap.xml), which is
+    // now the canonical serving host and returns the sitemap directly. Redirects are
+    // still followed defensively — we only care that the URL ultimately serves a sitemap.
     const res = await request.get(sitemapUrl);
     expect(
       res.status(),

@@ -43,28 +43,25 @@
  * 2 = script error.
  */
 
-// Canonical host per site, verified 2026-08-03. These do NOT agree — foxbox and
-// signallabs canonicalise to www, stormwind canonicalises to the apex. Asserting
+// Canonical host per site. These do NOT agree — foxbox canonicalises to the apex
+// (since FOX2-155, 2026-08-05), signallabs to www, stormwind to the apex. Asserting
 // the wrong direction produces a permanently red monitor, so each site declares
 // its own expectation rather than sharing a convention.
 const SITES = [
   {
     key: 'foxbox',
     label: 'foxbox.com',
-    origin: 'https://www.foxbox.com',
-    // apex 308 -> www
-    redirectFrom: 'https://foxbox.com',
+    origin: 'https://foxbox.com',
+    // www 308 -> apex
+    redirectFrom: 'https://www.foxbox.com',
     canonicalSamplePaths: ['/', '/blog', '/services/product-lab'],
 
-    // WARNING(FOX2-155): that ticket is "Fix www redirect direction — foxbox.com
-    // should be primary", i.e. the intended fix FLIPS this to www 301 -> apex.
-    // When it lands, swap these two values or the redirect-direction check pages a
-    // false alarm on a correctly-configured site — and a monitor that cries wolf on
-    // day one is the failure mode this whole file exists to prevent.
-    //   origin:       'https://foxbox.com'
-    //   redirectFrom: 'https://www.foxbox.com'
-    // The canonical checks need no change: tags already point at the apex, which is
-    // exactly why they start passing once the apex becomes primary.
+    // FOX2-155 ("Fix www redirect direction — foxbox.com should be primary") landed
+    // 2026-08-05 via the website's FOX2-166 SEO fix. The apex is now the primary
+    // serving host and www 308s to it, matching the apex the sitemap and every
+    // rel=canonical tag already pointed at. Direction was flipped from apex->www to
+    // www->apex here; the canonical checks now pass because tags point at the apex,
+    // which is finally the serving host.
   },
   {
     key: 'stormwind',
@@ -100,14 +97,16 @@ const TIMEOUT_MS = 20_000;
  *   'gate' — fails the job and pages the channel. Reserved for the deindexing class.
  *   'warn' — reported and archived, but does not page anyone.
  *
- * The tiers exist because of FOX2-155. The canonical checks below fail on
- * production RIGHT NOW (261 pages), so shipping them as gating would make the
- * monitor red on its first run — and a monitor that is red on arrival gets muted,
- * which is the exact failure this whole exercise is meant to prevent. They run as
- * warnings until FOX2-155 lands.
+ * The tiers exist because of FOX2-155. Until 2026-08-05 the canonical checks failed
+ * on production (261 pages canonicalised to the apex while www was primary), so
+ * shipping them as gating would have made the monitor red on its first run — the
+ * exact failure this whole exercise is meant to prevent. FOX2-155 landed on
+ * 2026-08-05 (apex is now primary), so these checks now pass and CANONICAL_TIER is
+ * ready to promote to 'gate'.
  *
- * TODO(FOX2-155): promote CANONICAL_TIER to 'gate' once canonical tags point at the
- * canonical serving host. At that point a regression here should page.
+ * TODO(FOX2-155): promote CANONICAL_TIER to 'gate' as a fast follow, once a green
+ * production run confirms the canonical checks pass. Kept 'warn' in the host-flip
+ * PR to keep that change reversible and free of a paging-behaviour change.
  */
 const CANONICAL_TIER = 'warn';
 
