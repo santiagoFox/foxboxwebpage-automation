@@ -1,20 +1,24 @@
 const { expect } = require('@playwright/test');
 const { test } = require('../fixtures/fixtures');
+const { assertPermanentRedirect } = require('../utils/http');
 
 // FOX2-40: Studio content cleanup
 //   1. /testforlayouts route deleted → 404
 //   2. "See All Case Studies" nav link uses relative href (not absolute foxbox.com URL)
-//   3. Four orphaned /services/* pages must be gone
+//   3. The orphaned /services/* pages must be gone
 //
-// FOX2-100: the four orphaned /services pages intermittently get re-published.
+// FOX2-100: these /services pages intermittently get re-published.
 // Raw HTTP status is NOT a reliable gate on this site — live pages (e.g.
 // /staff-aug) also return 404 to a direct GET, and "restored" windows can be
 // soft-404s (HTTP 200 + a "Page Not Found" body). So we GATE on what a real
 // user/crawler sees — the rendered "Page Not Found" page — and LOG the HTTP +
 // nav status as diagnostic evidence for the ticket (never the pass/fail gate).
 
+// /services/react-native-consulting is no longer orphaned: the site now
+// 308-redirects it to /services/product-lab (declared in the website's
+// redirects.js), so it is asserted as a redirect (SC34-TC03), not a dead page.
+// The rest are still orphaned and must render the "Page Not Found" page.
 const ORPHANED_SERVICES = [
-  '/services/react-native-consulting',
   '/services/react-native-mobile-app-development',
   '/services/elixir-web-development-services',
   '/services/elixir-consulting-services',
@@ -63,21 +67,24 @@ test.describe('SC34 - Studio Content Cleanup (FOX2-40)', () => {
     expect(href).toBe('/case-studies');
   });
 
-  // TC03–06: orphaned /services pages must show "Page Not Found" (not restored — FOX2-100).
-  test('SC34-TC03 - /services/react-native-consulting shows Page Not Found (FOX2-100)', async ({ page, request }, testInfo) => {
+  // SC34-TC03: /services/react-native-consulting is now a permanent redirect to
+  // /services/product-lab (site redirects.js), not an orphaned dead page (FOX2-100).
+  test('SC34-TC03 - /services/react-native-consulting redirects to /services/product-lab (FOX2-100)', async ({ request }) => {
+    await assertPermanentRedirect(request, '/services/react-native-consulting', '/services/product-lab');
+  });
+
+  // TC04–06: the remaining orphaned /services pages must still show "Page Not Found"
+  // (not restored — FOX2-100).
+  test('SC34-TC04 - /services/react-native-mobile-app-development shows Page Not Found (FOX2-100)', async ({ page, request }, testInfo) => {
     await assertOrphanedPageGone({ page, request }, ORPHANED_SERVICES[0], testInfo);
   });
 
-  test('SC34-TC04 - /services/react-native-mobile-app-development shows Page Not Found (FOX2-100)', async ({ page, request }, testInfo) => {
+  test('SC34-TC05 - /services/elixir-web-development-services shows Page Not Found (FOX2-100)', async ({ page, request }, testInfo) => {
     await assertOrphanedPageGone({ page, request }, ORPHANED_SERVICES[1], testInfo);
   });
 
-  test('SC34-TC05 - /services/elixir-web-development-services shows Page Not Found (FOX2-100)', async ({ page, request }, testInfo) => {
-    await assertOrphanedPageGone({ page, request }, ORPHANED_SERVICES[2], testInfo);
-  });
-
   test('SC34-TC06 - /services/elixir-consulting-services shows Page Not Found (FOX2-100)', async ({ page, request }, testInfo) => {
-    await assertOrphanedPageGone({ page, request }, ORPHANED_SERVICES[3], testInfo);
+    await assertOrphanedPageGone({ page, request }, ORPHANED_SERVICES[2], testInfo);
   });
 
 });
