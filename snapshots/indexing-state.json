@@ -1,20 +1,20 @@
 {
   "foxbox-www": {
     "origin": "https://www.foxbox.com",
-    "robotsStatus": 200,
+    "robotsStatus": 308,
+    "robotsRedirectsTo": "https://foxbox.com/robots.txt",
     "robotsBody": "User-agent: *\nAllow: /\n\nSitemap: https://foxbox.com/sitemap.xml",
-    "rootStatus": 200,
+    "rootStatus": 308,
     "xRobotsTag": null,
+    "rootRedirectsTo": "https://foxbox.com/",
     "canonical": "https://foxbox.com"
   },
   "foxbox-apex": {
     "origin": "https://foxbox.com",
-    "robotsStatus": 308,
-    "robotsRedirectsTo": "https://www.foxbox.com/robots.txt",
+    "robotsStatus": 200,
     "robotsBody": "User-agent: *\nAllow: /\n\nSitemap: https://foxbox.com/sitemap.xml",
-    "rootStatus": 308,
+    "rootStatus": 200,
     "xRobotsTag": null,
-    "rootRedirectsTo": "https://www.foxbox.com/",
     "canonical": "https://foxbox.com"
   },
   "stormwind": {
