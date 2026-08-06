@@ -3,7 +3,9 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-Playwright E2E automation suite for **https://www.foxbox.com** — the Foxbox Digital agency website.
+Playwright E2E automation suite for **https://foxbox.com** — the Foxbox Digital agency website.
+The apex is the canonical host since FOX2-155 (2026-08-05); `www` 308s to it, and the suite's
+`baseURL` points at the apex.
 
 - **Framework**: Playwright v1.59+ with Chromium, viewport 1440×900
 - **Pattern**: Page Object Model (POM)
@@ -238,7 +240,7 @@ the inverted staging check. Canonical hosts differ per site and are declared ind
 
 | Site | Canonical host | Non-canonical |
 |---|---|---|
-| foxbox.com | `www.foxbox.com` | apex 308 → www |
+| foxbox.com | `foxbox.com` (apex) | www 308 → apex (FOX2-155, 2026-08-05) |
 | stormwindstudios.com | `stormwindstudios.com` (apex) | www 301 → apex |
 | signallabs.ai | `www.signallabs.ai` | not asserted |
 
@@ -246,9 +248,11 @@ the inverted staging check. Canonical hosts differ per site and are declared ind
 class (blanket `Disallow: /`, `noindex` header). `warn` is reported in the run summary and
 artifact but pages nobody. Warnings do not affect the exit code.
 
-The tiers exist because of **FOX2-155**: the canonical checks fail on production today, so
-shipping them as gating would make the monitor red on its first run, and a monitor that is
-red on arrival gets muted. Promote `CANONICAL_TIER` to `'gate'` once FOX2-155 lands.
+The tiers exist because of **FOX2-155**: the canonical checks failed on production until
+2026-08-05, so shipping them as gating would have made the monitor red on its first run, and a
+monitor that is red on arrival gets muted. **FOX2-155 landed 2026-08-05 — the apex is now
+canonical and the canonical checks pass**, so `CANONICAL_TIER` is ready to promote to `'gate'`
+(kept `'warn'` in the host-flip change; promote as a fast follow once a green run confirms it).
 
 **FOX2-155 root cause (confirmed 2026-07-31 via Ahrefs Site Audit, 261/261 rows)**: every
 `www.foxbox.com` page returns 200 with `rel=canonical` pointing at the **apex** host and the

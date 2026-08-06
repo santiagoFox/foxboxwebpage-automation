@@ -12,10 +12,11 @@ const { expect } = require('@playwright/test');
 // array to a single value — nothing else needs to change.
 const PERMANENT_REDIRECT_CODES = [301, 308];
 
-const PROD_HOST = 'www.foxbox.com';
+// Canonical/serving host is the apex (FOX2-155, landed 2026-08-05); www 308s to it.
+const PROD_HOST = 'foxbox.com';
 
 // Normalize any Location value (absolute or relative) to a bare pathname with no
-// trailing slash, so "/blog", "/blog/" and "https://www.foxbox.com/blog" compare equal.
+// trailing slash, so "/blog", "/blog/" and "https://foxbox.com/blog" compare equal.
 function pathnameOf(location) {
   try {
     return new URL(location, `https://${PROD_HOST}`).pathname.replace(/\/+$/, '') || '/';
