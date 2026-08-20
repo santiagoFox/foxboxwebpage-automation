@@ -38,9 +38,10 @@ test.describe('SC13 - Navigation Menu - COMPANY Links', () => {
     await expect(homePage.page).toHaveURL(/\/about/);
   });
 
-  test('SC13-TC02 - "Our Work" navigates to Case Studies page', async ({ homePage }) => {
+  test('SC13-TC02 - "Case Studies" navigates to Case Studies page', async ({ homePage }) => {
     await homePage.openNavMenu();
-    await homePage.navOurWork.click();
+    // The header nav item was relabelled "Our Work" -> "Case Studies" (same /case-studies target).
+    await homePage.navCaseStudies.click();
     await homePage.page.waitForLoadState('load');
     // FOX2-129: nav link migrated from /tags/case-studies to /case-studies.
     await expect(homePage.page).toHaveURL(/\/case-studies$/);
@@ -229,9 +230,9 @@ test.describe('SC20 - Footer Link Health', () => {
 // URLs. Asserting the href attribute directly (not just the post-redirect URL) so a
 // regression to the old target is caught even though the old paths still redirect.
 test.describe('SC41 - Navigation menu case-study links point to /case-studies (FOX2-129)', () => {
-  test('SC41-TC01 - "Our Work" href is /case-studies', async ({ homePage }) => {
+  test('SC41-TC01 - "Case Studies" href is /case-studies', async ({ homePage }) => {
     await homePage.openNavMenu();
-    await expect(homePage.navOurWork).toHaveAttribute('href', '/case-studies');
+    await expect(homePage.navCaseStudies).toHaveAttribute('href', '/case-studies');
   });
 
   test('SC41-TC02 - "See All Case Studies" href is /case-studies', async ({ homePage }) => {
