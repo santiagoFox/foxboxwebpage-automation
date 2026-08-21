@@ -15,14 +15,16 @@ class HomePage extends BasePage {
     this.navLetsChatButton = page.getByRole('link', { name: /LET'S CHAT/i });
 
     // COMPANY links
-    // Scoped to <nav>: the footer was relabelled to use these same three names
-    // ("About" -> "About Us", plus "Our Work" and "Inside the Box"), so an
-    // unscoped getByRole now matches the nav link AND the footer link and fails
-    // on strict mode. There is exactly one <nav> and one <footer>, which makes
-    // both semantic scopes unambiguous — preferred over `.first()`, since that
+    // Scoped to <nav>: the footer carries links with these same names, so an
+    // unscoped getByRole would match both the nav and footer copies and fail on
+    // strict mode. There is exactly one <nav> and one <footer>, which makes both
+    // semantic scopes unambiguous — preferred over `.first()`, since that
     // silently depends on DOM order.
+    // The header nav's case-studies item is labelled "Case Studies" (the footer
+    // still labels the same /case-studies link "Our Work"); exact:true so it
+    // doesn't also match the "See All Case Studies" link in the same menu.
     this.navAboutUs = page.locator('nav').getByRole('link', { name: 'About Us' });
-    this.navOurWork = page.locator('nav').getByRole('link', { name: 'Our Work' });
+    this.navCaseStudies = page.locator('nav').getByRole('link', { name: 'Case Studies', exact: true });
     this.navInsideTheBox = page.locator('nav').getByRole('link', { name: 'Inside the Box' });
     // SOLUTIONS links
     this.navProductLab = page.getByRole('link', { name: 'Product Lab' }).first();
